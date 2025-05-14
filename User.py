@@ -1,1 +1,0 @@
-print("Test User Class")
