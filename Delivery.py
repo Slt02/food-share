@@ -5,4 +5,3 @@ class Delivery:
         self.customer_id = customer_id
         self.customer_address = customer_address
         self.items = []
-    

@@ -1,9 +1,7 @@
-class Customer:
-    def __init__(self, Customer_id, name, email, phone_number, adress_num ): 
-        self.Customer_id = Customer_id
-        self.name = name
-        self.email = email
+from User import User
+
+class Customer(User):
+    def __init__(self, customer_id, username, name, surname, password, email, phone_number):
+        super.__init(customer_id, username, name, surname, password, email)
         self.phone_number = phone_number
-        self.adress_num = adress_num
-        
         self.order_history = []

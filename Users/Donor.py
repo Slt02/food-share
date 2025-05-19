@@ -1,10 +1,8 @@
-class Donor: 
-    def __init__(self, Donor_id, name, email, phone_number, donation_info):
-         self.Donor_id = Donor_id
-         self.name = name
-         self.email = email
-         self.phone_number = phone_number
-         self.donation_info = donation_info
+from User import User
 
-         self.donation_history = []
+class Donor(User): 
+    def __init__(self, donor_id, username, name, surname, password, email, phone_number):
+        super.__init__(self, donor_id, username, name, surname, password, email)
+        self.phone_number = phone_number
+        self.donation_history = [] # List to store donation history
     

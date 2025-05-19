@@ -1,5 +1,5 @@
-from Users.User import User
+from User import User
 
 class Admin(User):
-    def __init__(self, username, name, surname, password, email, phone_number):
-        super().__init__(username, name, surname, password, email, phone_number)
+    def __init__(self, admin_id, username, name, surname, password, email):
+        super().__init__(admin_id, username, name, surname, password, email)
