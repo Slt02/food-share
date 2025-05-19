@@ -1,4 +1,4 @@
-class FootItem:
+class FoodItem:
     def __init__(self, item_id, name, description, category):
         self.item_id  = item_id
         self.name = name
