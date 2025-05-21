@@ -1,8 +1,10 @@
 from Database import Database
 from FoodRequest import FoodRequest
+from GUI.WarningScreen import WarningScreen
 
 class OrderController:
-    def __init__(self):
+    def __init__(self, root = None):
+        self.root = root # Initialize the root window
         self.db = Database() # Create a new instance of the Database class
 
     # Submit an order to the database
@@ -20,6 +22,14 @@ class OrderController:
             else:
                 print("Items not available")
                 # TODO: Replace with proper screen message
+                # Show a warning screen if items are not available
+                warning_screen = WarningScreen(self.root, "Some of the items are not available! Please check your order.")
+                warning_screen.show_warning()
+        else:
+            # Show a warning screen if the information is not valid
+            warning_screen = WarningScreen(self.root, "Please fill in all fields.")
+            warning_screen.show_warning()
+            print("Warning: Please fill in all fields.")
 
     # Validate the information provided by the customer (missing fields, etc.)
     def validate_info(self, numberOfPpl, delivery_address, items):
@@ -28,9 +38,3 @@ class OrderController:
             print("Missing information") # TODO: Replace with proper screen message
             return False
         return True
-
-# test case
-if __name__ == "__main__":
-    order_controller = OrderController()
-    order_controller.submit_order(2, 3, "123 Main St", {"chips": 5})
-    # Add more test cases as needed
