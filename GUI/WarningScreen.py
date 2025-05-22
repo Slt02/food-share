@@ -18,3 +18,6 @@ class WarningScreen:
         ok_button = tk.Button(self.top, text="OK", command=self.close_warning)
         ok_button.config(font=tkFont.Font(size=12), bg="#4CAF50", fg="white")
         ok_button.pack(pady=10)
+
+    def close_warning(self):
+        self.top.destroy()
