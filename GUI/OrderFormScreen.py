@@ -8,7 +8,7 @@ class OrderFormScreen:
         self.root = root
         self.selected_items = selected_items
         self.root.title("Order Form")
-        self.controller = OrderController()  # Create an instance of the OrderController
+        self.controller = OrderController(self.root)  # Create an instance of the OrderController
 
     # Function to show up the form with the details of the order 
     def showOrderForm(self):
@@ -51,4 +51,4 @@ class OrderFormScreen:
         num_people = self.people_entry.get()
 
         # Call the controller to handle the order submission
-        self.controller.submit_order(name, address, num_people, self.selected_items)
+        self.controller.submit_order(1, num_people, address,  self.selected_items)

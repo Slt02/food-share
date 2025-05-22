@@ -1,6 +1,7 @@
 from Database import Database
 from FoodRequest import FoodRequest
 from GUI.WarningScreen import WarningScreen
+from GUI.ConfirmedOrderScreen import ConfirmedOrderScreen
 
 class OrderController:
     def __init__(self, root = None):
@@ -16,12 +17,13 @@ class OrderController:
                 # Create a new Food Request
                 food_request = FoodRequest(customer_id, delivery_address, number_of_people, items)
                 self.db.save_order(food_request) # Save the order to the database
+                success_screen = ConfirmedOrderScreen(self.root) # Create a new Confirmed Order screen
+                success_screen.show_confirmed_order(food_request) # Show the order confirmation screen
                 print("Order submitted successfully!") # TODO: Replace with proper screen message
                 self.db.update_quantities(items) # Update the inventory in the database
                 print("Inventory updated successfully!")
             else:
                 print("Items not available")
-                # TODO: Replace with proper screen message
                 # Show a warning screen if items are not available
                 warning_screen = WarningScreen(self.root, "Some of the items are not available! Please check your order.")
                 warning_screen.show_warning()

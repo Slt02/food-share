@@ -72,7 +72,7 @@ class Database:
     def save_order(self, food_request):
         # Save the order to the database
         query = "INSERT INTO food_requests (customer_id, delivery_address, number_of_people, status, created_at) VALUES (%s, %s, %s, %s, %s)"
-        params = (food_request.number_of_people, food_request.delivery_address, food_request.number_of_people, food_request.status, food_request.made)
+        params = (food_request.customer_id, food_request.delivery_address, food_request.number_of_people, food_request.status, food_request.made)
         self.execute_query(query, params)
         self.connection.commit() # Commit the changes to the database
 
