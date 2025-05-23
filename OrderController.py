@@ -34,9 +34,19 @@ class OrderController:
             print("Warning: Please fill in all fields.")
 
     # Validate the information provided by the customer (missing fields, etc.)
-    def validate_info(self, numberOfPpl, delivery_address, items):
+    def validate_info(self, number_of_people, delivery_address, items):
         # Validate the information provided by the customer
-        if not numberOfPpl or not delivery_address or not items:
-            print("Missing information") # TODO: Replace with proper screen message
+        if not number_of_people or not delivery_address or not items:
+            print("Missing information")
             return False
         return True
+
+    # Check order existence
+    def check_order_existence(self, customer_id):
+        # Check if the order exists in the database
+        exists = self.db.query_order(customer_id)
+        if exists is not None:
+            print("Order exists")
+            # Retrieve the order details
+        else:
+            print("Order does not exist")
