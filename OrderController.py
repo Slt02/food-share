@@ -2,6 +2,7 @@ from Database import Database
 from FoodRequest import FoodRequest
 from GUI.WarningScreen import WarningScreen
 from GUI.ConfirmedOrderScreen import ConfirmedOrderScreen
+from GUI.TrackOrderScreen import TrackOrderScreen
 
 class OrderController:
     def __init__(self, root = None):
@@ -19,9 +20,7 @@ class OrderController:
                 self.db.save_order(food_request) # Save the order to the database
                 success_screen = ConfirmedOrderScreen(self.root) # Create a new Confirmed Order screen
                 success_screen.show_confirmed_order(food_request) # Show the order confirmation screen
-                print("Order submitted successfully!") # TODO: Replace with proper screen message
                 self.db.update_quantities(items) # Update the inventory in the database
-                print("Inventory updated successfully!")
             else:
                 print("Items not available")
                 # Show a warning screen if items are not available
@@ -44,9 +43,11 @@ class OrderController:
     # Check order existence
     def check_order_existence(self, customer_id):
         # Check if the order exists in the database
-        exists = self.db.query_order(customer_id)
-        if exists is not None:
-            print("Order exists")
-            # Retrieve the order details
+        request = self.db.query_order(customer_id)
+        if request is not None:
+            order_status_screen = TrackOrderScreen(self.root)
+            order_status_screen.show_order_status(request) # Show the order status screen
         else:
-            print("Order does not exist")
+            # Show a warning screen if the order does not exist
+            warning_screen = WarningScreen(self.root, "No order found for this customer ID.")
+            warning_screen.show_warning()

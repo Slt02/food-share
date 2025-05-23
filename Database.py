@@ -1,4 +1,5 @@
 import mysql.connector
+from FoodRequest import FoodRequest
 
 class Database:
     _connection = None # Class variable to hold the single instance so only one connection is created each time
@@ -104,16 +105,29 @@ class Database:
         query = "SELECT * FROM food_requests WHERE customer_id = %s AND status != 'delivered'"
         params = (customer_id,)
         order_data = self.execute_query(query, params)
+
+        print(f"Order data: {order_data}")
         
         if not order_data: # If no pending orders are found
-            print(f"No pending order found for customer {customer_id}")
             return None
 
         # Get the order details from the database
         query = "SELECT item_name, quantity FROM food_request_items WHERE request_id = %s"
         params = (order_data[0][0],)
         items_data = self.execute_query(query, params)
-        print(f"Order data: {order_data}")
-        print(f"Items data: {items_data}")
 
-        return order_data, items_data # Return the order data and items data
+        # Hold items to return them
+        items = {}
+        for item in items_data:
+            items[item[0]] = item[1]
+
+        # Create a food request object to return
+        food_request = FoodRequest(
+            customer_id=order_data[0][1],
+            delivery_address=order_data[0][2],
+            number_of_people=order_data[0][3],
+            items=items,
+            status=order_data[0][4],
+        )
+
+        return food_request # Return the food request object
