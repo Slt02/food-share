@@ -63,3 +63,12 @@ class MainScreenDonor:
         # Open the AccountModScreen for a donor.
         account_screen = AccountModScreen(self.root, "donor")
         account_screen.displayAccountModScreen(user_id=123)
+
+    def display(self):
+        """Display the donor main screen"""
+        self.root.deiconify()  # Show the window if it was hidden
+        self.root.mainloop()
+
+    def run(self):
+        
+        self.display()

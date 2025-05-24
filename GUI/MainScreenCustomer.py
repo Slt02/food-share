@@ -46,6 +46,13 @@ class CustomerMainScreen:
         account_screen = AccountModScreen(self.root, "customer")
         account_screen.displayAccountModScreen(user_id=7)  
 
-    def run(self):
+
+    def display(self):
+        """Display the customer main screen"""
+        self.root.deiconify()  # Show the window if it was hidden
         self.root.mainloop()
+
+    def run(self):
+        
+        self.display()
 

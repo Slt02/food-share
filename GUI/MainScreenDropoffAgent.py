@@ -64,6 +64,12 @@ class MainScreenDropoffAgent:
         account_screen = AccountModScreen(self.root, "drop_off_agent")
         account_screen.displayAccountModScreen(user_id=123)  
 
-    def run(self):
+    def display(self):
+        """Display the dropoff agent main screen"""
+        self.root.deiconify()  # Show the window if it was hidden
         self.root.mainloop()
+
+    def run(self):
+        
+        self.display()
 

@@ -79,6 +79,15 @@ class MainScreenAdmin:
         account_screen = AccountModScreen(self.root, "admin")
         account_screen.displayAccountModScreen(user_id=123)  
 
-    def run(self):
+    def display(self):
+        """Display the admin main screen"""
+        self.root.deiconify()  # Show the window if it was hidden
         self.root.mainloop()
 
+    def run(self):
+        
+        self.display()
+
+        
+
+    
