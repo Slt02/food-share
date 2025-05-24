@@ -23,8 +23,7 @@ class TrackOrderScreen:
         status_label.pack(pady=(0, 10))
 
         # Summary
-        summary = f"Name: {food_request.customer_id}\n" \
-                  f"Address: {food_request.delivery_address}\n" \
+        summary = f"Address: {food_request.delivery_address}\n" \
                   f"People: {food_request.number_of_people}\n"
         summary_label = tk.Label(self.root, text=summary)
         summary_label.pack(pady=(0, 10))

@@ -72,8 +72,8 @@ class Database:
     # Save the order to the database
     def save_order(self, food_request):
         # Save the order to the database
-        query = "INSERT INTO food_requests (customer_id, delivery_address, number_of_people, status, created_at) VALUES (%s, %s, %s, %s, %s)"
-        params = (food_request.customer_id, food_request.delivery_address, food_request.number_of_people, food_request.status, food_request.made)
+        query = "INSERT INTO food_requests (customer_id, delivery_address, number_of_people, status) VALUES (%s, %s, %s, %s)"
+        params = (food_request.customer_id, food_request.delivery_address, food_request.number_of_people, food_request.status)
         self.execute_query(query, params)
         self.connection.commit() # Commit the changes to the database
 
@@ -105,8 +105,6 @@ class Database:
         query = "SELECT * FROM food_requests WHERE customer_id = %s AND status != 'delivered'"
         params = (customer_id,)
         order_data = self.execute_query(query, params)
-
-        print(f"Order data: {order_data}")
         
         if not order_data: # If no pending orders are found
             return None
@@ -131,3 +129,40 @@ class Database:
         )
 
         return food_request # Return the food request object
+    
+    # Query the order history for a customer
+    def query_order_history(self, customer_id):
+        # Get the order history from the database for the customer
+        query = "SELECT * FROM food_requests WHERE customer_id = %s and status = 'delivered'"
+        # Query to get all orders for a specific customer
+        params = (customer_id,)
+        order_data = self.execute_query(query, params)
+
+        if not order_data:  # If no orders are found
+            return None
+
+        # Get the order details from the database
+        order_history = []
+        for order in order_data:
+            request_id, customer_id, delivery_address, number_of_people, status, created_at = order
+
+            # Get the items for each order
+            items_query = "SELECT item_name, quantity FROM food_request_items WHERE request_id = %s"
+            items_results = self.execute_query(items_query, (request_id,))
+            items = {item: quantity for item, quantity in items_results}
+
+            # Append the order to the history
+            food_request = FoodRequest(
+                request_id=request_id,
+                customer_id=customer_id,
+                delivery_address=delivery_address,
+                number_of_people=number_of_people,
+                items=items,
+                status=status,
+                made=created_at
+            )
+
+            order_history.append(food_request)
+
+        # Return the list of food requests
+        return order_history  # Return the list of food requests

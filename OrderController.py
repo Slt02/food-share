@@ -3,6 +3,7 @@ from FoodRequest import FoodRequest
 from GUI.WarningScreen import WarningScreen
 from GUI.ConfirmedOrderScreen import ConfirmedOrderScreen
 from GUI.TrackOrderScreen import TrackOrderScreen
+from GUI.OrderHistoryScreen import OrderHistoryScreen
 
 class OrderController:
     def __init__(self, root = None):
@@ -30,7 +31,6 @@ class OrderController:
             # Show a warning screen if the information is not valid
             warning_screen = WarningScreen(self.root, "Please fill in all fields.")
             warning_screen.show_warning()
-            print("Warning: Please fill in all fields.")
 
     # Validate the information provided by the customer (missing fields, etc.)
     def validate_info(self, number_of_people, delivery_address, items):
@@ -50,4 +50,17 @@ class OrderController:
         else:
             # Show a warning screen if the order does not exist
             warning_screen = WarningScreen(self.root, "No order found for this customer ID.")
+            warning_screen.show_warning()
+
+    # Fetch order history
+    def fetch_order_history(self, customer_id):
+        # Fetch the order history from the database
+        orders = self.db.query_order_history(customer_id)
+        if orders:
+            # TODO: Implement the logic to display the order history
+            order_history_screen = OrderHistoryScreen(self.root)
+            order_history_screen.display_order_history(orders)
+        else:
+            # Show a warning screen if no orders are found
+            warning_screen = WarningScreen(self.root, "No order history found for this customer ID.")
             warning_screen.show_warning()
