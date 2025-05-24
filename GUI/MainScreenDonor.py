@@ -1,9 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from datetime import datetime
-import GUI.AccountModScreen from AccountModScreen
-
-import re
+from GUI.AccountModScreen import AccountModScreen  
 
 class MainScreenDonor:
     def __init__(self):
@@ -11,10 +8,9 @@ class MainScreenDonor:
         self.root.title("Donor Main Screen")
         self.root.geometry("400x500")
 
-        self.donation_controller = MockDonationController()
-
         tk.Label(self.root, text="Donor Main Screen", font=("Helvetica", 16)).pack(pady=20)
 
+        # "Report" button
         tk.Button(
             self.root,
             text="Report",
@@ -23,6 +19,7 @@ class MainScreenDonor:
             height=2
         ).pack(pady=10)
 
+        # "Register Donation" button
         tk.Button(
             self.root,
             text="Register Donation",
@@ -31,6 +28,7 @@ class MainScreenDonor:
             height=2
         ).pack(pady=10)
 
+        # "Track Donation Usage" button
         tk.Button(
             self.root,
             text="Track Donation Usage",
@@ -39,6 +37,7 @@ class MainScreenDonor:
             height=2
         ).pack(pady=10)
 
+        # "Manage Account" button at the bottom.
         tk.Button(
             self.root,
             text="Manage Account",
@@ -53,33 +52,14 @@ class MainScreenDonor:
         messagebox.showinfo("Report", "Report button pressed. (Not implemented)")
 
     def register_donation(self):
-        print("🔄 Register Donation button clicked!")
-        
-        self.root.withdraw()
-        
-        registration_form = RegistrationFormScreen(self.root, self.donation_controller)
-        registration_form.display()
+        messagebox.showinfo("Register Donation", "Register Donation button pressed. (Not implemented)")
 
     def track_donation_usage(self):
         messagebox.showinfo("Track Donation Usage", "Track Donation Usage button pressed. (Not implemented)")
 
     def manage_account(self):
+        # Hide the donor main screen while account modifications take place.
         self.root.withdraw()
+        # Open the AccountModScreen for a donor.
         account_screen = AccountModScreen(self.root, "donor")
-        account_screen.displayAccountModScreen(user_id=123)  
-
-    def run(self):
-        self.root.mainloop()
-
-if __name__ == "__main__":
-    print("🚀 Starting Donor Main Screen...")
-    
-    try:
-        app = MainScreenDonor()
-        app.run()
-        
-    except Exception as e:
-        print(f"❌ Error running application: {e}")
-        import traceback
-        traceback.print_exc()
-        input("Press Enter to exit...")
+        account_screen.displayAccountModScreen(user_id=123)
