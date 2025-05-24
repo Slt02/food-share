@@ -27,15 +27,17 @@ class DonationController:
         if not self.validate_donation(item_name, quantity):
             return False
 
+        # Updated query to use donation_info table (matches your database structure)
         query = """
-        INSERT INTO donations (donor_id, item_name, quantity, donation_date)
+        INSERT INTO donation_info (donor_id, item_name, quantity, donated_at)
         VALUES (%s, %s, %s, %s)
         """
         params = (donor_id, item_name, quantity, donation_date)
 
         try:
-            self.db.execute_query(query, params)
-            self.db.connection.commit()
+            # Fixed: changed self.db to self.merkdb
+            self.merkdb.execute_query(query, params)
+            self.merkdb.connection.commit()
             print("Donation successfully recorded.")
             return True
         except Exception as e:
