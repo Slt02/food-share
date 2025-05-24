@@ -1,8 +1,8 @@
-from merkdb import Database
+from Database import Database
 
 class DonationController:
     def __init__(self):
-        self.merkdb = Database()
+        self.Database = Database()
 
     def check_donation_details(self, item_name, quantity):
         """Ensure donation details are valid before proceeding."""
@@ -35,9 +35,9 @@ class DonationController:
         params = (donor_id, item_name, quantity, donation_date)
 
         try:
-            # Fixed: changed self.db to self.merkdb
-            self.merkdb.execute_query(query, params)
-            self.merkdb.connection.commit()
+            # Changed self.merkdb to self.Database
+            self.Database.execute_query(query, params)
+            self.Database.connection.commit()
             print("Donation successfully recorded.")
             return True
         except Exception as e:

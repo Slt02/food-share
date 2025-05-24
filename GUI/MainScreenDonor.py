@@ -7,20 +7,20 @@ import re
 class Database:
     def __init__(self):
         try:
-            from merkdb import Database as MerkDB
-            self.merkdb = MerkDB()
-            self.connection = self.merkdb.connection
+            from Database import Database as DatabaseDB
+            self.Database = DatabaseDB()
+            self.connection = self.Database.connection
         except ImportError:
             self.connection = None
     
     def execute_query(self, query, params=None):
-        if hasattr(self, 'merkdb'):
-            return self.merkdb.execute_query(query, params)
+        if hasattr(self, 'Database'):
+            return self.Database.execute_query(query, params)
         return [("John", "Doe", "johndoe", "john@example.com", "password123", "1234567890", "123 Main St")]
 
 class CredentialController:
     def __init__(self):
-        self.diondb = Database()
+        self.Database = Database()
 
     def validate_email(self, email):
         email_regex = r'^[\w\.-]+@[\w\.-]+\.\w{2,}$'
@@ -275,3 +275,16 @@ class MainScreenDonor:
 
     def run(self):
         self.root.mainloop()
+
+if __name__ == "__main__":
+    print("🚀 Starting Donor Main Screen...")
+    
+    try:
+        app = MainScreenDonor()
+        app.run()
+        
+    except Exception as e:
+        print(f"❌ Error running application: {e}")
+        import traceback
+        traceback.print_exc()
+        input("Press Enter to exit...")
