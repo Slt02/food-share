@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  
+from GUI.StatisticsReportScreen import StatisticsReportScreen
 
 class MainScreenAdmin:
     def __init__(self):
@@ -67,7 +68,7 @@ class MainScreenAdmin:
         messagebox.showinfo("Monitor Delivery", "Monitor Delivery button clicked. (Not implemented)")
 
     def view_statistics(self):
-        messagebox.showinfo("Statistics & Reports", "View Statistics & Reports button clicked. (Not implemented)")
+        StatisticsReportScreen(self.root, admin_id=123)
 
     def manage_account(self):
         # Hide the admin main screen while AccountModScreen is active.
