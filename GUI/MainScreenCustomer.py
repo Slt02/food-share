@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from GUI.AccountModScreen import AccountModScreen  # Ensure this file is in the same directory or in the PYTHONPATH
+from GUI.AccountModScreen import AccountModScreen  
 
 class CustomerMainScreen:
     def __init__(self, user_data=None):

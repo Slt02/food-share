@@ -4,7 +4,7 @@ from tkinter import messagebox
 class LoginScreen:
     def __init__(self):
         self.root = tk.Tk()
-        # Import CredentialController inside __init__ to avoid circular imports
+        
         from CredentialController import CredentialController
         self.credential_controller = CredentialController()
         self.current_user = None
@@ -15,7 +15,7 @@ class LoginScreen:
     def setup_window(self):
         """Configure the main window"""
         self.root.title("FoodShare - Login")
-        self.root.geometry("400x600")  # Made taller to show Register button
+        self.root.geometry("400x600")  
         self.root.resizable(False, False)
         
         # Center the window
