@@ -3,12 +3,22 @@ from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  # Ensure this file is in the same directory or in the PYTHONPATH
 
 class CustomerMainScreen:
-    def __init__(self):
+    def __init__(self, user_data=None):
         self.root = tk.Tk()
         self.root.title("Customer Main Screen")
         self.root.geometry("400x500")
-
-        tk.Label(self.root, text="Customer Main Screen", font=("Helvetica", 16)).pack(pady=20)
+        
+        # Store user data and get the real user ID
+        self.user_data = user_data
+        self.user_id = user_data['id'] if user_data else None
+        
+        # Display welcome message with user name
+        if user_data:
+            welcome_text = f"Customer Main Screen - Welcome {user_data['name']}"
+        else:
+            welcome_text = "Customer Main Screen"
+        
+        tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
 
         # "Menu" button
         tk.Button(self.root, text="Menu", command=self.menu, width=20, height=2).pack(pady=10)
@@ -44,8 +54,8 @@ class CustomerMainScreen:
         self.root.withdraw()
         # Open the AccountModScreen passing in the parent window and role ("customer").
         account_screen = AccountModScreen(self.root, "customer")
-        account_screen.displayAccountModScreen(user_id=7)  
-
+        # Use the real user_id from the logged-in user instead of hardcoded 7
+        account_screen.displayAccountModScreen(user_id=self.user_id)
 
     def display(self):
         """Display the customer main screen"""
@@ -53,6 +63,4 @@ class CustomerMainScreen:
         self.root.mainloop()
 
     def run(self):
-        
         self.display()
-

@@ -3,12 +3,22 @@ from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  
 
 class MainScreenDonor:
-    def __init__(self):
+    def __init__(self, user_data=None):
         self.root = tk.Tk()
         self.root.title("Donor Main Screen")
         self.root.geometry("400x500")
-
-        tk.Label(self.root, text="Donor Main Screen", font=("Helvetica", 16)).pack(pady=20)
+        
+        # Store user data and get the real user ID
+        self.user_data = user_data
+        self.user_id = user_data['id'] if user_data else None
+        
+        # Display welcome message with user name
+        if user_data:
+            welcome_text = f"Donor Main Screen - Welcome {user_data['name']}"
+        else:
+            welcome_text = "Donor Main Screen"
+        
+        tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
 
         # "Report" button
         tk.Button(
@@ -62,7 +72,8 @@ class MainScreenDonor:
         self.root.withdraw()
         # Open the AccountModScreen for a donor.
         account_screen = AccountModScreen(self.root, "donor")
-        account_screen.displayAccountModScreen(user_id=123)
+        # Use the real user_id from the logged-in user instead of hardcoded 123
+        account_screen.displayAccountModScreen(user_id=self.user_id)
 
     def display(self):
         """Display the donor main screen"""
@@ -70,5 +81,4 @@ class MainScreenDonor:
         self.root.mainloop()
 
     def run(self):
-        
         self.display()

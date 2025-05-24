@@ -4,12 +4,22 @@ from GUI.AccountModScreen import AccountModScreen
 from GUI.StatisticsReportScreen import StatisticsReportScreen
 
 class MainScreenAdmin:
-    def __init__(self):
+    def __init__(self, user_data=None):
         self.root = tk.Tk()
         self.root.title("Admin Main Screen")
         self.root.geometry("400x500")
-
-        tk.Label(self.root, text="Admin Main Screen", font=("Helvetica", 16)).pack(pady=20)
+        
+        # Store user data and get the real user ID
+        self.user_data = user_data
+        self.user_id = user_data['id'] if user_data else None
+        
+        # Display welcome message with user name
+        if user_data:
+            welcome_text = f"Admin Main Screen - Welcome {user_data['name']}"
+        else:
+            welcome_text = "Admin Main Screen"
+        
+        tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
 
         # "Manage Inventory" button
         tk.Button(
@@ -68,7 +78,9 @@ class MainScreenAdmin:
         messagebox.showinfo("Monitor Delivery", "Monitor Delivery button clicked. (Not implemented)")
 
     def view_statistics(self):
-        StatisticsReportScreen(self.root, admin_id=123)
+        # Pass the real admin_id instead of hardcoded 123
+        admin_id = self.user_id if self.user_id else 123
+        StatisticsReportScreen(self.root, admin_id=admin_id)
 
     def manage_account(self):
         # Hide the admin main screen while AccountModScreen is active.
@@ -77,7 +89,8 @@ class MainScreenAdmin:
         # Open the AccountModScreen window;
         # pass self.root as the parent and the role "admin".
         account_screen = AccountModScreen(self.root, "admin")
-        account_screen.displayAccountModScreen(user_id=123)  
+        # Use the real user_id from the logged-in user instead of hardcoded 123
+        account_screen.displayAccountModScreen(user_id=self.user_id)
 
     def display(self):
         """Display the admin main screen"""
@@ -85,9 +98,4 @@ class MainScreenAdmin:
         self.root.mainloop()
 
     def run(self):
-        
         self.display()
-
-        
-
-    

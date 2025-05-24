@@ -1,12 +1,119 @@
 import re
-from diondb import Database
+from Database import Database
 
 
 class CredentialController:
     def __init__(self):
-        self.diondb = Database() # Create a new instance of the Database class 
+        self.Database = Database() # Create a new instance of the Database class 
 
     
+    def login(self, email, password):
+        """
+        Authenticates user credentials against the database.
+        Returns (success, message, user_data) tuple.
+        """
+        # First validate email format
+        if not self.validate_email(email):
+            return False, "Invalid email format.", None
+        
+        # Check if password is provided
+        if not password or password.strip() == "":
+            return False, "Password cannot be empty.", None
+        
+        try:
+            # Query database to find user with matching email
+            user_data = self.Database.get_user_by_email(email) # CHANGE DB EVERY TIME!!!!
+            
+            if user_data is None:
+                return False, "Invalid email or password.", None
+            
+            # Check if the password matches (assuming password is stored in user_data)
+            # Note: In production, you should use hashed passwords!
+            if user_data.get('password') == password:
+                # Remove password from user_data before returning for security
+                safe_user_data = {k: v for k, v in user_data.items() if k != 'password'}
+                return True, "Login successful.", safe_user_data
+            else:
+                return False, "Invalid email or password.", None
+                
+        except Exception as e:
+            print(f"Database error during login: {e}")
+            return False, "Login failed due to system error.", None
+    
+    
+    def open_user_main_screen(self, user_data):
+        """
+        Opens the appropriate main screen based on user role.
+        """
+        role = user_data['role']
+        
+        try:
+            if role == 'admin':
+                # Import inside the method to avoid circular imports
+                from GUI.MainScreenAdmin import MainScreenAdmin
+                screen = MainScreenAdmin(user_data)  # Pass user_data
+                screen.display()
+                
+            elif role == 'customer':
+                # Import inside the method to avoid circular imports
+                from GUI.MainScreenCustomer import CustomerMainScreen
+                screen = CustomerMainScreen(user_data)  # Pass user_data
+                screen.display()
+                
+            elif role == 'donor':
+                # Import inside the method to avoid circular imports
+                from GUI.MainScreenDonor import MainScreenDonor
+                screen = MainScreenDonor(user_data)  # Pass user_data
+                screen.display()
+                
+            elif role == 'dropoffagent':
+                # Import inside the method to avoid circular imports
+                from GUI.MainScreenDropoffAgent import MainScreenDropoffAgent
+                screen = MainScreenDropoffAgent(user_data)  # Pass user_data
+                screen.display()
+                
+            else:
+                print(f"Unknown role: {role}")
+                return False
+                
+            return True
+            
+        except ImportError as e:
+            print(f"Error importing screen for role {role}: {e}")
+            print("Make sure the main screen files are in the correct location")
+            return False
+        except Exception as e:
+            print(f"Error opening screen for role {role}: {e}")
+            return False
+    
+    
+    def get_user_dashboard_route(self, user_role):
+        """
+        Returns the appropriate dashboard route based on user role.
+        """
+        dashboard_routes = {
+            'admin': 'admin_dashboard',
+            'customer': 'customer_main_screen',
+            'donor': 'donor_dashboard',
+            'dropoffagent': 'agent_dashboard'
+        }
+        
+        return dashboard_routes.get(user_role, 'customer_main_screen')  # Default to customer
+    
+    
+    def check_user_permissions(self, user_role, required_permission):
+        """
+        Checks if user has permission to access certain features.
+        """
+        permissions = {
+            'admin': ['manage_users', 'view_all_orders', 'manage_inventory', 'view_reports'],
+            'customer': ['place_order', 'view_own_orders', 'update_profile'],
+            'donor': ['donate_food', 'view_own_donations', 'update_profile'],
+            'dropoffagent': ['manage_deliveries', 'view_assigned_orders', 'update_profile']
+        }
+        
+        user_permissions = permissions.get(user_role, [])
+        return required_permission in user_permissions
     
     
     def validate_email(self, email):
@@ -77,7 +184,7 @@ class CredentialController:
     
     
     def validate_name_field(self, name):
-        """Validates name fields (name, surname, nickname)"""
+        """Validates name fields (name, surname, username)"""
         if not name.strip():
             return False, "Field cannot be empty."
         
@@ -93,57 +200,8 @@ class CredentialController:
     
     
     def update(self, user_id, updated_info):
-        """Updates user information and returns success status"""
-        try:
-            # Remove empty fields from updates
-            filtered_updates = {k: v for k, v in updated_info.items() if v.strip()}
-            
-            if not filtered_updates:
-                return False, "No updates provided."
-            
-            # Basic validation for email, password, and phone if they're being updated
-            if "email" in filtered_updates and not self.validate_email(filtered_updates["email"]):
-                return False, "Invalid email format."
-            
-            if "password" in filtered_updates:
-                is_strong, message = self.validate_password_strength(filtered_updates["password"])
-                if not is_strong:
-                    return False, message
-            
-            if "phone" in filtered_updates and not self.validate_phone(filtered_updates["phone"]):
-                return False, "Phone number must be exactly 10 digits."
-            
-            # Select all relevant fields for comparison
-            fields_to_select = ['name', 'surname', 'nickname', 'email', 'password', 'phone', 'address']
-            current_query = f"SELECT {', '.join(fields_to_select)} FROM users WHERE id = %s"
-            result = self.diondb.execute_query(current_query, (user_id,))
-
-            if not result:
-                return False, "User not found."
-
-            current_data = dict(zip(fields_to_select, result[0]))
-            changed_fields = {k: v for k, v in filtered_updates.items() if current_data.get(k) != v}
-
-            if not changed_fields:
-                return False, "No changes detected."
-
-            update_clauses = []
-            values = []
-
-            for key, value in changed_fields.items():
-                update_clauses.append(f"{key} = %s")
-                values.append(value)
-
-            values.append(user_id)
-
-            query = f"UPDATE users SET {', '.join(update_clauses)} WHERE id = %s"
-            self.diondb.execute_query(query, tuple(values))
-            self.diondb.connection.commit()
-            
-            return True, "User info updated successfully."
-            
-        except Exception as e:
-            return False, f"Database error: {str(e)}"
+        """Updates user information using the database method"""
+        return self.Database.update_account_info(user_id, updated_info, self) # change DB EVERY TIME!!!!!
 
         
     def update_name(self, user_id, new_name):
@@ -152,8 +210,8 @@ class CredentialController:
     def update_surname(self, user_id, new_surname):
         return self.update(user_id, {"surname": new_surname})
 
-    def update_nickname(self, user_id, new_nickname):
-        return self.update(user_id, {"nickname": new_nickname})
+    def update_username(self, user_id, new_username):
+        return self.update(user_id, {"username": new_username})
 
     def update_email(self, user_id, new_email):
         
@@ -163,8 +221,4 @@ class CredentialController:
             return False, "Invalid email format."
         return self.update(user_id, {"email": new_email})
 
-    def update_address(self, user_id, new_address):
-        
-        #Updates user's delivery address.
-        
-        return self.update(user_id, {"address": new_address})
+    

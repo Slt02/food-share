@@ -41,7 +41,7 @@ class AccountModScreen:
         
         self.window = tk.Toplevel(self.parent)
         self.window.title("Modify Account")
-        self.window.geometry("400x500")
+        self.window.geometry("400x450")  # Made shorter since no address field
 
     def displayAccountModScreen(self, user_id):
         self.user_id = user_id
@@ -50,11 +50,11 @@ class AccountModScreen:
             updates = {
                 "name": self.name_entry.get().strip(),
                 "surname": self.surname_entry.get().strip(),
-                "nickname": self.nickname_entry.get().strip(),
+                "username": self.username_entry.get().strip(),
                 "email": self.email_entry.get().strip(),
                 "password": self.password_entry.get().strip(),
-                "phone": self.phone_entry.get().strip(),
-                "address": self.address_entry.get().strip()
+                "phone": self.phone_entry.get().strip()
+                # REMOVED: "address" field since column was deleted from users table
             }
 
             # Send updates to controller 
@@ -70,15 +70,15 @@ class AccountModScreen:
 
         self.name_entry = self._add_labeled_entry("Name")
         self.surname_entry = self._add_labeled_entry("Surname")
-        self.nickname_entry = self._add_labeled_entry("Nickname")
+        self.username_entry = self._add_labeled_entry("Username")
         self.email_entry = self._add_labeled_entry("Email")
         self.password_entry = self._add_labeled_entry("Password", show="*")
         self.phone_entry = self._add_labeled_entry("Phone")
-        self.address_entry = self._add_labeled_entry("Address")
+        # REMOVED: self.address_entry since address column was deleted
 
         tk.Button(self.window, text="Submit Changes", command=submit_changes).pack(pady=20)
 
-        # "Main Menu" button to return to the main screen.
+        # "Main Screen" button to return to the main screen.
         tk.Button(self.window, text="Main Screen", command=self.go_to_main_screen,
                   bg="#FFA500", fg="white").pack(pady=10)
 
@@ -90,4 +90,4 @@ class AccountModScreen:
 
     def go_to_main_screen(self):
         self.window.destroy()  # Close the account modification window.
-        self.main_screen_callback()  # Re-display the main screen 
+        self.main_screen_callback()  # Re-display the main screen

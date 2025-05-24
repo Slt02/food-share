@@ -1,6 +1,7 @@
 import mysql.connector
 from FoodRequest import FoodRequest
 
+
 class Database:
     _connection = None # Class variable to hold the single instance so only one connection is created each time
     # Constructor to initialize the database connection
@@ -132,6 +133,7 @@ class Database:
     
     # Query the order history for a customer
     def query_order_history(self, customer_id):
+
         # Get the order history from the database for the customer
         query = "SELECT * FROM food_requests WHERE customer_id = %s and status = 'delivered'"
         # Query to get all orders for a specific customer
@@ -166,3 +168,132 @@ class Database:
 
         # Return the list of food requests
         return order_history  # Return the list of food requests
+    
+        # NEW METHOD: Get user by email for login functionality
+    
+    # Get user by email for login functionality
+    def get_user_by_email(self, email):
+        """
+        Retrieves user data by email for login authentication.
+        Returns user data as dictionary or None if not found.
+        """
+        try:
+            query = "SELECT id, name, surname, email, password, phone, role FROM users WHERE email = %s"
+            result = self.execute_query(query, (email,))
+            
+            if result:
+                user_data = {
+                    'id': result[0][0],
+                    'name': result[0][1],
+                    'surname': result[0][2],
+                    'email': result[0][3],
+                    'password': result[0][4],
+                    'phone': result[0][5],
+                    'role': result[0][6]
+                }
+                return user_data
+            else:
+                return None
+                
+        except mysql.connector.Error as err:
+            print(f"Database error in get_user_by_email: {err}")
+            return None
+    
+    # Get user by ID
+    def get_user_by_id(self, user_id):
+        """
+        Retrieves user data by user ID.
+        Returns user data as dictionary or None if not found.
+        """
+        try:
+            query = "SELECT id, name, surname, email, phone, role FROM users WHERE id = %s"
+            result = self.execute_query(query, (user_id,))
+            
+            if result:
+                user_data = {
+                    'id': result[0][0],
+                    'name': result[0][1],
+                    'surname': result[0][2],
+                    'email': result[0][3],
+                    'phone': result[0][4],
+                    'role': result[0][5]
+                }
+                return user_data
+            else:
+                return None
+                
+        except mysql.connector.Error as err:
+            print(f"Database error in get_user_by_id: {err}")
+            return None
+    
+    # Check if email exists
+    def email_exists(self, email):
+        """
+        Checks if an email already exists in the database.
+        Returns True if exists, False otherwise.
+        """
+        try:
+            query = "SELECT COUNT(*) FROM users WHERE email = %s"
+            result = self.execute_query(query, (email,))
+            
+            if result and result[0][0] > 0:
+                return True
+            return False
+                
+        except mysql.connector.Error as err:
+            print(f"Database error in email_exists: {err}")
+            return False
+    
+    # Update account information
+    def update_account_info(self, user_id, updated_info, credential_controller):
+        """Updates user information and returns success status"""
+        try:
+            # Remove empty fields from updates
+            filtered_updates = {k: v for k, v in updated_info.items() if v.strip()}
+            
+            if not filtered_updates:
+                return False, "No updates provided."
+            
+            # Basic validation for email, password, and phone if they're being updated
+            if "email" in filtered_updates and not credential_controller.validate_email(filtered_updates["email"]):
+                return False, "Invalid email format."
+            
+            if "password" in filtered_updates:
+                is_strong, message = credential_controller.validate_password_strength(filtered_updates["password"])
+                if not is_strong:
+                    return False, message
+            
+            if "phone" in filtered_updates and not credential_controller.validate_phone(filtered_updates["phone"]):
+                return False, "Phone number must be exactly 10 digits."
+            
+            # Select fields that exist in the database
+            fields_to_select = ['name', 'surname', 'email', 'password', 'phone', 'role']
+            current_query = f"SELECT {', '.join(fields_to_select)} FROM users WHERE id = %s"
+            result = self.execute_query(current_query, (user_id,))
+
+            if not result:
+                return False, "User not found."
+
+            current_data = dict(zip(fields_to_select, result[0]))
+            changed_fields = {k: v for k, v in filtered_updates.items() if current_data.get(k) != v}
+
+            if not changed_fields:
+                return False, "No changes detected."
+
+            update_clauses = []
+            values = []
+
+            for key, value in changed_fields.items():
+                update_clauses.append(f"{key} = %s")
+                values.append(value)
+
+            values.append(user_id)
+
+            query = f"UPDATE users SET {', '.join(update_clauses)} WHERE id = %s"
+            self.execute_query(query, tuple(values))
+            self.connection.commit()
+            
+            return True, "User info updated successfully."
+            
+        except Exception as e:
+            return False, f"Database error: {str(e)}"
