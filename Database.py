@@ -304,3 +304,116 @@ class Database:
             
         except Exception as e:
             return False, f"Database error: {str(e)}"
+
+    # DONATION METHODS - ADDED FOR DONATION FUNCTIONALITY
+
+    def create_donations_table(self):
+        """Create donations table if it doesn't exist"""
+        try:
+            query = """
+                CREATE TABLE IF NOT EXISTS donations (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    donor_id VARCHAR(100) NOT NULL,
+                    item_name VARCHAR(200) NOT NULL,
+                    quantity INT NOT NULL,
+                    donation_date DATE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (donor_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            """
+            self.execute_query(query)
+            self.connection.commit()
+            print("Donations table created/verified successfully!")
+            
+        except mysql.connector.Error as err:
+            print(f"Error creating donations table: {err}")
+
+    def create_donation(self, donor_id, item_name, quantity, donation_date):
+        """Create a new donation record"""
+        try:
+            query = "INSERT INTO donations (donor_id, item_name, quantity, donation_date) VALUES (%s, %s, %s, %s)"
+            params = (donor_id, item_name, quantity, donation_date)
+            self.execute_query(query, params)
+            self.connection.commit()
+            
+            # Get the donation ID of the newly created donation
+            donation_id = self.cursor.lastrowid
+            print(f"Donation {donation_id} created successfully!")
+            return donation_id
+            
+        except mysql.connector.Error as err:
+            print(f"Error creating donation: {err}")
+            return None
+
+    def get_donation_by_id(self, donation_id):
+        """Get a specific donation by ID"""
+        try:
+            query = "SELECT id, donor_id, item_name, quantity, donation_date, created_at FROM donations WHERE id = %s"
+            result = self.execute_query(query, (donation_id,))
+            
+            if result:
+                donation_data = {
+                    'id': result[0][0],
+                    'donor_id': result[0][1],
+                    'item_name': result[0][2],
+                    'quantity': result[0][3],
+                    'donation_date': str(result[0][4]),
+                    'created_at': str(result[0][5])
+                }
+                return donation_data
+            else:
+                return None
+                
+        except mysql.connector.Error as err:
+            print(f"Database error in get_donation_by_id: {err}")
+            return None
+
+    def get_donations_by_donor(self, donor_id):
+        """Get all donations for a specific donor"""
+        try:
+            query = "SELECT id, donor_id, item_name, quantity, donation_date, created_at FROM donations WHERE donor_id = %s ORDER BY created_at DESC"
+            result = self.execute_query(query, (donor_id,))
+            
+            donations = []
+            if result:
+                for row in result:
+                    donation_data = {
+                        'id': row[0],
+                        'donor_id': row[1],
+                        'item_name': row[2],
+                        'quantity': row[3],
+                        'donation_date': str(row[4]),
+                        'created_at': str(row[5])
+                    }
+                    donations.append(donation_data)
+            
+            return donations
+            
+        except mysql.connector.Error as err:
+            print(f"Database error in get_donations_by_donor: {err}")
+            return []
+
+    def get_all_donations(self):
+        """Get all donations"""
+        try:
+            query = "SELECT id, donor_id, item_name, quantity, donation_date, created_at FROM donations ORDER BY created_at DESC"
+            result = self.execute_query(query)
+            
+            donations = []
+            if result:
+                for row in result:
+                    donation_data = {
+                        'id': row[0],
+                        'donor_id': row[1],
+                        'item_name': row[2],
+                        'quantity': row[3],
+                        'donation_date': str(row[4]),
+                        'created_at': str(row[5])
+                    }
+                    donations.append(donation_data)
+            
+            return donations
+            
+        except mysql.connector.Error as err:
+            print(f"Database error in get_all_donations: {err}")
+            return []

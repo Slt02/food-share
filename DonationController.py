@@ -1,45 +1,109 @@
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 from Database import Database
 
 class DonationController:
-    def __init__(self):
-        self.Database = Database()
-
-    def check_donation_details(self, item_name, quantity):
-        """Ensure donation details are valid before proceeding."""
-        if not item_name or quantity <= 0:
-            print("Invalid donation details: Item name must not be empty and quantity must be greater than zero.")
-            return False
-        
-        print(f"Donation details checked: Item = {item_name}, Quantity = {quantity}")
-        return True
-
-    def validate_donation(self, item_name, quantity):
-        """Perform final validation on the donation details."""
-        if not self.check_donation_details(item_name, quantity):
-            print("Validation failed due to incorrect donation details.")
-            return False
-        
-        print("Donation details validated successfully.")
-        return True
-
-    def create_donation(self, donor_id, item_name, quantity, donation_date):
-        """Ensure donation details are validated before inserting a new record."""
-        if not self.validate_donation(item_name, quantity):
-            return False
-
-        # Updated query to use donation_info table (matches your database structure)
-        query = """
-        INSERT INTO donation_info (donor_id, item_name, quantity, donated_at)
-        VALUES (%s, %s, %s, %s)
+    def __init__(self, host="localhost", user="root", password="", database="foodshare"):
+        self.db = Database(host, user, password, database)
+        # Create donations table if it doesn't exist
+        self.db.create_donations_table()
+    
+    def check_details(self, donation_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        params = (donor_id, item_name, quantity, donation_date)
-
+        Check item name and quantity only
+        """
+        errors = []
+        
+        # Check item name
+        if 'item_name' not in donation_data or not donation_data['item_name']:
+            errors.append("Item name is required")
+        
+        # Check quantity
+        if 'quantity' not in donation_data or not donation_data['quantity']:
+            errors.append("Quantity is required")
+        else:
+            try:
+                quantity = int(donation_data['quantity'])
+                if quantity <= 0:
+                    errors.append("Quantity must be a positive number")
+            except (ValueError, TypeError):
+                errors.append("Quantity must be a valid number")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors
+        }
+    
+    def validate_donation(self, donation_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate the donation
+        """
+        # First check details
+        check_result = self.check_details(donation_data)
+        
+        if not check_result['valid']:
+            return check_result
+        
+        # Validation passed
+        return {
+            'valid': True,
+            'errors': []
+        }
+    
+    def creating_donation(self, donation_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create the donation in the database using Database class
+        """
         try:
-            # Changed self.merkdb to self.Database
-            self.Database.execute_query(query, params)
-            self.Database.connection.commit()
-            print("Donation successfully recorded.")
-            return True
+            # Add default values for required fields if not provided
+            if 'donor_id' not in donation_data:
+                donation_data['donor_id'] = 'ANONYMOUS'
+            if 'donation_date' not in donation_data:
+                donation_data['donation_date'] = datetime.now().strftime('%Y-%m-%d')
+            
+            # Use Database class method to create donation
+            donation_id = self.db.create_donation(
+                donor_id=donation_data['donor_id'],
+                item_name=donation_data['item_name'],
+                quantity=int(donation_data['quantity']),
+                donation_date=donation_data['donation_date']
+            )
+            
+            if donation_id:
+                # Get the created donation using Database class method
+                created_donation = self.db.get_donation_by_id(donation_id)
+                
+                return {
+                    'success': True,
+                    'donation': created_donation,
+                    'message': f"Donation registered successfully with ID: {donation_id}"
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'Database error',
+                    'message': "Failed to create donation"
+                }
+        
         except Exception as e:
-            print(f"Error while processing donation: {e}")
-            return False
+            return {
+                'success': False,
+                'error': str(e),
+                'message': "Failed to create donation"
+            }
+    
+    # Helper methods for screens
+    def display(self) -> Dict[str, Any]:
+        """Get all donations for display using Database class"""
+        donations = self.db.get_all_donations()
+        return {
+            'total_donations': len(donations),
+            'donations': donations
+        }
+    
+    def show_warning(self, warnings: List[str]) -> Dict[str, Any]:
+        """Format warnings for display"""
+        return {
+            'has_warnings': len(warnings) > 0,
+            'warnings': warnings
+        }

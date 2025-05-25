@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-from GUI.AccountModScreen import AccountModScreen  
 
 class MainScreenDonor:
     def __init__(self, user_data=None):
@@ -11,6 +10,9 @@ class MainScreenDonor:
         # Store user data and get the real user ID
         self.user_data = user_data
         self.user_id = user_data['id'] if user_data else None
+        
+        # Initialize DonationController - will be set up when needed
+        self.DonationController = None
         
         # Display welcome message with user name
         if user_data:
@@ -58,22 +60,125 @@ class MainScreenDonor:
             height=2
         ).pack(side="bottom", pady=20)
 
+    def _initialize_donation_controller(self):
+        """Initialize DonationController when needed"""
+        if self.DonationController is not None:
+            return True
+            
+        try:
+            from DonationController import DonationController
+            self.DonationController = DonationController()
+            print("DonationController initialized successfully")
+            return True
+        except ImportError:
+            print("Could not import DonationController")
+            return False
+        except Exception as e:
+            print(f"Error initializing DonationController: {e}")
+            return False
+
+    def _initialize_registration_form(self):
+        """Initialize RegistrationFormScreen when needed"""
+        try:
+            from RegistrationFormScreen import RegistrationFormScreen
+            return RegistrationFormScreen
+        except ImportError:
+            try:
+                from GUI.RegistrationFormScreen import RegistrationFormScreen
+                return RegistrationFormScreen
+            except ImportError:
+                print("Could not import RegistrationFormScreen")
+                return None
+
+    def _initialize_account_mod(self):
+        """Initialize AccountModScreen when needed"""
+        try:
+            from AccountModScreen import AccountModScreen
+            return AccountModScreen
+        except ImportError:
+            try:
+                from GUI.AccountModScreen import AccountModScreen
+                return AccountModScreen
+            except ImportError:
+                print("Could not import AccountModScreen")
+                return None
+
     def report(self):
         messagebox.showinfo("Report", "Report button pressed. (Not implemented)")
 
     def register_donation(self):
-        messagebox.showinfo("Register Donation", "Register Donation button pressed. (Not implemented)")
+        """Open the registration form screen"""
+        print("Register Donation button clicked...")
+        
+        # Initialize DonationController
+        if not self._initialize_donation_controller():
+            messagebox.showwarning("Missing Module", 
+                                 "DonationController not found.\n\n"
+                                 "Please make sure you have:\n"
+                                 "• DonationController.py file\n"
+                                 "• Database.py file (for database)")
+            return
+        
+        # Initialize RegistrationFormScreen
+        RegistrationFormScreenClass = self._initialize_registration_form()
+        if not RegistrationFormScreenClass:
+            messagebox.showwarning("Missing Module", 
+                                 "RegistrationFormScreen not found.\n\n"
+                                 "Please create RegistrationFormScreen.py file\n"
+                                 "with the registration form code.")
+            return
+        
+        try:
+            print("Opening Registration Form from Donor Main Screen...")
+            self.root.withdraw()  # Hide the donor main screen
+            
+            # Create and display registration form - pass user_id
+            registration_form = RegistrationFormScreenClass(self.root, self.DonationController, self.user_id)
+            registration_form.display()
+            
+        except TypeError as te:
+            print(f"TypeError: {te}")
+            print("This suggests a signature mismatch. Trying alternative approach...")
+            try:
+                # Try with just parent argument in case DonationController is passed differently
+                registration_form = RegistrationFormScreenClass(self.root)
+                registration_form.DonationController = self.DonationController  # Set as attribute
+                registration_form.display()
+            except Exception as e2:
+                print(f"Alternative approach failed: {e2}")
+                messagebox.showerror("Error", f"Failed to create registration form:\n{str(te)}\n\nTry checking RegistrationFormScreen constructor.")
+                self.root.deiconify()
+        except Exception as e:
+            print(f"Error opening registration form: {e}")
+            messagebox.showerror("Error", f"Failed to open registration form:\n{str(e)}")
+            self.root.deiconify()  # Show main screen again if error
 
     def track_donation_usage(self):
         messagebox.showinfo("Track Donation Usage", "Track Donation Usage button pressed. (Not implemented)")
 
     def manage_account(self):
-        # Hide the donor main screen while account modifications take place.
-        self.root.withdraw()
-        # Open the AccountModScreen for a donor.
-        account_screen = AccountModScreen(self.root, "donor")
-        # Use the real user_id from the logged-in user instead of hardcoded 123
-        account_screen.displayAccountModScreen(user_id=self.user_id)
+        print("Manage Account button clicked...")
+        
+        # Initialize AccountModScreen
+        AccountModScreen = self._initialize_account_mod()
+        if not AccountModScreen:
+            messagebox.showwarning("Missing Module", 
+                                 "AccountModScreen not found.\n\n"
+                                 "Please make sure AccountModScreen.py exists.")
+            return
+        
+        try:
+            # Hide the donor main screen while account modifications take place.
+            self.root.withdraw()
+            # Open the AccountModScreen for a donor.
+            account_screen = AccountModScreen(self.root, "donor")
+            # Use the real user_id from the logged-in user
+            account_screen.displayAccountModScreen(user_id=self.user_id)
+            
+        except Exception as e:
+            print(f"Error opening account screen: {e}")
+            messagebox.showerror("Error", f"Failed to open account screen:\n{str(e)}")
+            self.root.deiconify()  # Show main screen again if error
 
     def display(self):
         """Display the donor main screen"""
