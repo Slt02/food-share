@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import font as tkFont
 from tkinter import messagebox
-from OrderController import OrderController
+from order_controller import OrderController
 
 class OrderFormScreen:
     def __init__(self, root, selected_items):

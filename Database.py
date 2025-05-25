@@ -171,6 +171,13 @@ class Database:
     
         # NEW METHOD: Get user by email for login functionality
     
+    # Save the report in the database
+    def create_report(self, report):
+        query = "INSERT INTO reports (request_id, customer_id, description) VALUES (%s, %s, %s)"
+        params = (report.request_id, report.customer_id, report.description)
+        self.execute_query(query, params)
+        self.connection.commit()  # Commit the changes to the database
+
     # Get user by email for login functionality
     def get_user_by_email(self, email):
         """

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import font as tkFont
 from tkinter import ttk
+from GUI.ReportFormScreen import ReportFormScreen
 
 class OrderHistoryScreen:
     def __init__(self, root):
@@ -37,8 +38,18 @@ class OrderHistoryScreen:
                 item_label = tk.Label(order_frame, text=f"• {item}: {qty}")
                 item_label.pack(anchor="w", padx=15)
 
+            # Inside the for loop, where each order is displayed, add a report button
+            report_button = tk.Button(order_frame, text="Report" , command=lambda o=order: self.click_report(o))
+            report_button.pack(pady=(5,0))
+
+
         # Back button
         tk.Button(self.root, text="Back to Main Menu", command=self.back_to_main).pack(pady=20)
+
+    # Event handler when the report button is clicked
+    def click_report(self, order):
+        report_screen = ReportFormScreen(self.root)
+        report_screen.display_form(order)
 
     def back_to_main(self):
         print("Returning to main menu...") #TODO: Placeholder for actual back navigation logic

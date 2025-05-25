@@ -1,9 +1,11 @@
+from tkinter import messagebox
 from Database import Database
 from FoodRequest import FoodRequest
 from GUI.WarningScreen import WarningScreen
 from GUI.ConfirmedOrderScreen import ConfirmedOrderScreen
 from GUI.TrackOrderScreen import TrackOrderScreen
-from GUI.OrderHistoryScreen import OrderHistoryScreen
+from Report import Report
+#from GUI.OrderHistoryScreen import OrderHistoryScreen
 
 class OrderController:
     def __init__(self, root = None):
@@ -54,13 +56,26 @@ class OrderController:
 
     # Fetch order history
     def fetch_order_history(self, customer_id):
+        from GUI.OrderHistoryScreen import OrderHistoryScreen
         # Fetch the order history from the database
         orders = self.db.query_order_history(customer_id)
         if orders:
-            # TODO: Implement the logic to display the order history
             order_history_screen = OrderHistoryScreen(self.root)
             order_history_screen.display_order_history(orders)
         else:
             # Show a warning screen if no orders are found
             warning_screen = WarningScreen(self.root, "No order history found for this customer ID.")
             warning_screen.show_warning()
+
+    # Validate report submission
+    def validate_report(self, order, description):
+        # Validate the report text
+        if not description:
+            warning_screen = WarningScreen(self.root, "Please provide a description for the report.")
+            warning_screen.show_warning()
+        else:
+            report = Report(order.request_id, order.customer_id, description)
+            self.db.create_report(report)  # Save the report to the database
+            messagebox.showinfo("Report Submitted", "Your report has been submitted successfully.")
+            # Redirect to order history
+            self.fetch_order_history(order.customer_id)
