@@ -178,6 +178,23 @@ class Database:
         self.execute_query(query, params)
         self.connection.commit()  # Commit the changes to the database
 
+    # Create a new drop-off agent in the database
+    def create_drop_off_agent(self, drop_off_agent):
+        check_query = "SELECT id FROM USERS WHERE email = %s"
+        check_params = (drop_off_agent.email,)
+        existing_user = self.execute_query(check_query, check_params)
+
+        # If the user already exists, return False
+        if existing_user:
+            print(f"User with email {drop_off_agent.email} already exists.")
+            return False  # User already exists
+        else: # If the user does not exist, create a new drop-off agent
+            query = "INSERT INTO users (name, surname, username, email, password, phone, role) VALUES (%s, %s, %s, %s, %s, %s, 'dropoffagent')"
+            params = (drop_off_agent.name, drop_off_agent.surname, drop_off_agent.username, drop_off_agent.email, drop_off_agent.get_password(), drop_off_agent.phone_number)
+            self.execute_query(query, params)
+            self.connection.commit()
+            return True  # User created successfully
+
     # Get user by email for login functionality
     def get_user_by_email(self, email):
         """

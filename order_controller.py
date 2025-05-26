@@ -47,7 +47,7 @@ class OrderController:
         # Check if the order exists in the database
         request = self.db.query_order(customer_id)
         if request is not None:
-            order_status_screen = TrackOrderScreen(self.root)
+            order_status_screen = TrackOrderScreen(self.root, customer_id)
             order_status_screen.show_order_status(request) # Show the order status screen
         else:
             # Show a warning screen if the order does not exist
@@ -60,7 +60,7 @@ class OrderController:
         # Fetch the order history from the database
         orders = self.db.query_order_history(customer_id)
         if orders:
-            order_history_screen = OrderHistoryScreen(self.root)
+            order_history_screen = OrderHistoryScreen(self.root, customer_id) 
             order_history_screen.display_order_history(orders)
         else:
             # Show a warning screen if no orders are found

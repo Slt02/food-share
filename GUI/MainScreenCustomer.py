@@ -1,22 +1,20 @@
 import tkinter as tk
 from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  
+from GUI.DropOffRegistrationScreen import DropOffRegistrationScreen
+from order_controller import OrderController
 
 class CustomerMainScreen:
-    def __init__(self, user_data=None):
-        self.root = tk.Tk()
+    def __init__(self, root=None, customer_id=None):
+        self.root = root if root is not None else tk.Tk()  # Use provided root or create a new one
         self.root.title("Customer Main Screen")
-        self.root.geometry("400x500")
+        self.root.geometry("500x500")
         
         # Store user data and get the real user ID
-        self.user_data = user_data
-        self.user_id = user_data['id'] if user_data else None
+        self.customer_id = customer_id
         
         # Display welcome message with user name
-        if user_data:
-            welcome_text = f"Customer Main Screen - Welcome {user_data['name']}"
-        else:
-            welcome_text = "Customer Main Screen"
+        welcome_text = "Welcome - Customer Main Screen"
         
         tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
 
@@ -43,11 +41,15 @@ class CustomerMainScreen:
     def menu(self):
         messagebox.showinfo("Menu", "Menu button clicked. (Not implemented)")
 
+    # Fetch and display the order history for the customer when the button is clicked
     def order_history(self):
-        messagebox.showinfo("Order History", "Order History button clicked. (Not implemented)")
+        order_controller = OrderController(self.root)
+        order_controller.fetch_order_history(self.customer_id)
 
+    # Track the order for the customer when the button is clicked
     def track_order(self):
-        messagebox.showinfo("Track Order", "Track Order button clicked. (Not implemented)")
+        order_controller = OrderController(self.root)
+        order_controller.check_order_existence(self.customer_id)
 
     def manage_account(self):
         # Hide the main screen while account modifications take place.

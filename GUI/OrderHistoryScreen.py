@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter import font as tkFont
 from tkinter import ttk
 from GUI.ReportFormScreen import ReportFormScreen
+from GUI.MainScreenCustomer import CustomerMainScreen
 
 class OrderHistoryScreen:
-    def __init__(self, root):
+    def __init__(self, root, customer_id=None):
+        self.customer_id = customer_id
         self.root = root
 
     # Display the order history in a formatted manner
@@ -13,15 +15,37 @@ class OrderHistoryScreen:
         for widget in self.root.winfo_children():
             widget.destroy()
 
+        # Wrapper frame to contain canvas and scrollbar
+        wrapper = tk.Frame(self.root)
+        wrapper.pack(fill="both", expand=True)
+
+        # Create a canvas and scrollbar
+        canvas = tk.Canvas(wrapper)
+        scrollbar = tk.Scrollbar(wrapper, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
+
+        scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(
+            scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
         # Title
-        title = tk.Label(self.root, text="🕘 Order History", fg="#333")
+        title = tk.Label(scrollable_frame, text="🕘 Order History", fg="#333")
         title.config(font=tkFont.Font(size=18, weight="bold"))
         title.pack(pady=20)
 
         # Loop through each order and display details
         for order in history_list:
-            order_frame = tk.Frame(self.root, bd=2, relief="groove", padx=10, pady=10)
-            order_frame.pack(pady=5, fill="x", padx=20)
+            order_frame = tk.Frame(scrollable_frame, bd=2, relief="ridge", padx=50, pady=15)
+            order_frame.pack(pady=15, fill="both", padx=30, expand=True)
 
             summary = f"Order ID: {order.request_id}\n" \
                       f"Date: {order.made}\n" \
@@ -42,9 +66,8 @@ class OrderHistoryScreen:
             report_button = tk.Button(order_frame, text="Report" , command=lambda o=order: self.click_report(o))
             report_button.pack(pady=(5,0))
 
-
         # Back button
-        tk.Button(self.root, text="Back to Main Menu", command=self.back_to_main).pack(pady=20)
+        tk.Button(self.root, text="Back to Main Menu", command=self.back_to_main).pack(pady=10)
 
     # Event handler when the report button is clicked
     def click_report(self, order):
@@ -52,4 +75,9 @@ class OrderHistoryScreen:
         report_screen.display_form(order)
 
     def back_to_main(self):
-        print("Returning to main menu...") #TODO: Placeholder for actual back navigation logic
+        # Clear current screen
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Load the main screen
+        CustomerMainScreen(self.root, self.customer_id)

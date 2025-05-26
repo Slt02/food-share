@@ -3,8 +3,9 @@ from tkinter import font as tkFont
 
 class TrackOrderScreen:
 
-    def __init__(self, root):
+    def __init__(self, root, customer_id=None):
         self.root = root
+        self.customer_id = customer_id
     
     def show_order_status(self, food_request):
         # Clear the root window
@@ -38,5 +39,10 @@ class TrackOrderScreen:
         tk.Button(self.root, text="Back to Main Menu", command=self.back_to_main).pack(pady=20)
 
     def back_to_main(self):
-        # TODO: Implement the logic to go back to the main menu
-        print("Back to main menu")
+        # Clear the root window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Return to the main screen
+        from GUI.MainScreenCustomer import CustomerMainScreen
+        CustomerMainScreen(self.root, self.customer_id)

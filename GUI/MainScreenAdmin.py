@@ -2,10 +2,11 @@ import tkinter as tk
 from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  
 from GUI.StatisticsReportScreen import StatisticsReportScreen
+from GUI.DropOffRegistrationScreen import DropOffRegistrationScreen
 
 class MainScreenAdmin:
-    def __init__(self, user_data=None):
-        self.root = tk.Tk()
+    def __init__(self, root=None, user_data=None):
+        self.root = tk.Tk() if root is None else root # Create a new Tkinter root window if not provided
         self.root.title("Admin Main Screen")
         self.root.geometry("400x500")
         
@@ -68,6 +69,15 @@ class MainScreenAdmin:
             height=2
         ).pack(side="bottom", pady=20)
 
+        # "Create Drop-Off Account" button
+        tk.Button(
+            self.root,
+            text="Create Drop-Off Account",
+            command=self.create_drop_off_agent_account,
+            width=20,
+            height=2
+        ).pack(pady=10)
+
     def manage_inventory(self):
         messagebox.showinfo("Manage Inventory", "Manage Inventory button clicked. (Not implemented)")
 
@@ -99,3 +109,11 @@ class MainScreenAdmin:
 
     def run(self):
         self.display()
+
+        # Create a new Drop-Off Agent account when the button is clicked
+    
+    # Click handler for "Create Drop-Off Account" button
+    def create_drop_off_agent_account(self):
+        # Open the DropOffRegistrationScreen
+        drop_off_screen = DropOffRegistrationScreen(self.root)
+        drop_off_screen.show_registration_form()
