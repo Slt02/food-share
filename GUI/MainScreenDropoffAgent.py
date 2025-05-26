@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  
+from GUI.UpdateDeliveryStatusScreen import UpdateDeliveryStatusScreen
 
 class MainScreenDropoffAgent:
     def __init__(self, user_data=None):
@@ -74,6 +75,9 @@ class MainScreenDropoffAgent:
         account_screen = AccountModScreen(self.root, "drop_off_agent")
         
         account_screen.displayAccountModScreen(user_id=self.user_id)
+    
+    def update_delivery_status(self):
+        UpdateDeliveryStatusScreen(self.root, self.user_id)
 
     def display(self):
         """Display the dropoff agent main screen"""
