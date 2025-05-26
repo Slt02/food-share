@@ -140,9 +140,9 @@ class MainScreenDonor:
             print(f"TypeError: {te}")
             print("This suggests a signature mismatch. Trying alternative approach...")
             try:
-                # Try with just parent argument in case DonationController is passed differently
+                
                 registration_form = RegistrationFormScreenClass(self.root)
-                registration_form.DonationController = self.DonationController  # Set as attribute
+                registration_form.DonationController = self.DonationController  
                 registration_form.display()
             except Exception as e2:
                 print(f"Alternative approach failed: {e2}")

@@ -1,267 +1,241 @@
 import tkinter as tk
 from tkinter import messagebox
+from CredentialController import CredentialController
+from GUI.RegisterFormScreen import RegisterFormScreen
+
 
 class LoginScreen:
     def __init__(self):
         self.root = tk.Tk()
-        
-        from CredentialController import CredentialController
-        self.credential_controller = CredentialController()
-        self.current_user = None
-        
-        self.setup_window()
-        self.create_widgets()
-        
-    def setup_window(self):
-        """Configure the main window"""
         self.root.title("FoodShare - Login")
-        self.root.geometry("400x600")  
-        self.root.resizable(False, False)
+        self.root.geometry("400x650")  
+        self.root.configure(bg="#2c3e50")
+        self.root.resizable(True, True)  
         
-        # Center the window
-        self.center_window()
+        # Add fullscreen capability
+        self.is_fullscreen = False
+        self.root.bind('<F11>', self.toggle_fullscreen)
+        self.root.bind('<Escape>', self.exit_fullscreen)
         
-        # Configure colors
-        self.bg_color = "#f0f8ff"
-        self.primary_color = "#2e86de"
-        self.success_color = "#2ecc71"
-        self.error_color = "#e74c3c"
+        # Initialize credential controller
+        self.credential_controller = CredentialController()
         
-        self.root.configure(bg=self.bg_color)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        # Main container - centered content that works in both windowed and fullscreen
+        main_frame = tk.Frame(self.root, bg="#2c3e50")
+        main_frame.pack(fill="both", expand=True, padx=30, pady=20)
         
-    def center_window(self):
-        """Center the window on screen"""
-        self.root.update_idletasks()
-        width = self.root.winfo_width()
-        height = self.root.winfo_height()
-        x = (self.root.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.root.winfo_screenheight() // 2) - (height // 2)
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        # Content container - max width to prevent stretching in fullscreen
+        content_frame = tk.Frame(main_frame, bg="#2c3e50")
+        content_frame.pack(expand=True)  # Center the content)
         
-    def create_widgets(self):
-        """Create and arrange all GUI widgets"""
-        # Main container - Reduced padding to fit Register button
-        main_frame = tk.Frame(self.root, bg=self.bg_color, padx=40, pady=20)
-        main_frame.pack(fill="both", expand=True)
+        # Title with fullscreen hint
+        title_frame = tk.Frame(content_frame, bg="#2c3e50")
+        title_frame.pack(pady=(0, 40))
         
-        # Header
-        self.create_header(main_frame)
+        title_label = tk.Label(
+            title_frame,
+            text="FoodShare",
+            font=("Arial", 28, "bold"),
+            bg="#2c3e50",
+            fg="#ecf0f1"
+        )
+        title_label.pack()
         
         # Login form
-        self.create_login_form(main_frame)
+        login_frame = tk.Frame(content_frame, bg="#34495e", relief="raised", bd=2)
+        login_frame.pack(fill="x", pady=(0, 30))  # Increased bottom padding
         
-    def create_header(self, parent):
-        """Create the header section"""
-        # App title
-        title_label = tk.Label(parent, text="FoodShare", 
-                              font=("Arial", 24, "bold"), 
-                              fg=self.primary_color, bg=self.bg_color)
-        title_label.pack(pady=(0, 10))
-        
-        # Subtitle
-        subtitle_label = tk.Label(parent, text="Login to your account", 
-                                 font=("Arial", 12), 
-                                 fg="gray", bg=self.bg_color)
-        subtitle_label.pack(pady=(0, 30))
-        
-    def create_login_form(self, parent):
-        """Create the login form"""
-        # Form container
-        form_frame = tk.Frame(parent, bg="white", relief="solid", bd=2)
-        form_frame.pack(fill="x")
-        
-        # Form padding - Reduced to make room for Register button
-        form_inner = tk.Frame(form_frame, bg="white", padx=30, pady=20)
-        form_inner.pack(fill="both", expand=True)
+        login_title = tk.Label(
+            login_frame,
+            text="Login",
+            font=("Arial", 18, "bold"),
+            bg="#34495e",
+            fg="#ecf0f1"
+        )
+        login_title.pack(pady=15)
         
         # Email field
-        email_label = tk.Label(form_inner, text="Email:", 
-                              font=("Arial", 11, "bold"), 
-                              fg="black", bg="white", anchor="w")
-        email_label.pack(fill="x", pady=(0, 5))
-        
-        self.email_var = tk.StringVar()
-        self.email_entry = tk.Entry(form_inner, textvariable=self.email_var,
-                                   font=("Arial", 12), relief="solid", bd=1)
-        self.email_entry.pack(fill="x", ipady=8, pady=(0, 15))
-        self.email_entry.bind('<Return>', lambda e: self.password_entry.focus())
+        self.email_entry = self._create_form_field(login_frame, "Email")
         
         # Password field
-        password_label = tk.Label(form_inner, text="Password:", 
-                                 font=("Arial", 11, "bold"), 
-                                 fg="black", bg="white", anchor="w")
-        password_label.pack(fill="x", pady=(0, 5))
-        
-        self.password_var = tk.StringVar()
-        self.password_entry = tk.Entry(form_inner, textvariable=self.password_var,
-                                      font=("Arial", 12), show="*", relief="solid", bd=1)
-        self.password_entry.pack(fill="x", ipady=8, pady=(0, 20))
-        self.password_entry.bind('<Return>', lambda e: self.handle_login())
+        self.password_entry = self._create_form_field(login_frame, "Password", show="*")
         
         # Login button
-        self.login_button = tk.Button(form_inner, text="Login", 
-                                     command=self.handle_login,
-                                     font=("Arial", 12, "bold"),
-                                     bg=self.primary_color, fg="white",
-                                     relief="flat", bd=0, pady=12,
-                                     cursor="hand2")
-        self.login_button.pack(fill="x", pady=(0, 10))
+        login_button = tk.Button(
+            login_frame,
+            text="Login",
+            font=("Arial", 14, "bold"),
+            bg="#3498db",
+            fg="white",
+            relief="flat",
+            padx=30,
+            pady=10,
+            command=self.handle_login
+        )
+        login_button.pack(pady=(15, 20))  # Added bottom padding
         
-        # Register button
-        self.register_button = tk.Button(form_inner, text="Register", 
-                                        command=self.handle_register,
-                                        font=("Arial", 12, "bold"),
-                                        bg="#f8f9fa", fg=self.primary_color,
-                                        relief="solid", bd=2, pady=12,
-                                        cursor="hand2")
-        self.register_button.pack(fill="x", pady=(10, 20))
+        # Registration section
+        register_frame = tk.Frame(content_frame, bg="#2c3e50")
+        register_frame.pack(fill="x", expand=False)  # Don't expand, fixed positioning
         
-        # Status message area
-        self.status_label = tk.Label(form_inner, text="", 
-                                    font=("Arial", 10), bg="white", wraplength=300)
-        self.status_label.pack()
+        register_label = tk.Label(
+            register_frame,
+            text="New User?",
+            font=("Arial", 14, "bold"),
+            bg="#2c3e50",
+            fg="#ecf0f1"
+        )
+        register_label.pack(pady=(0, 15))
         
-    def clear_status(self):
-        """Clear status message"""
-        self.status_label.config(text="", fg="black")
+        # Register buttons
+        customer_button = tk.Button(
+            register_frame,
+            text="Register as Customer",
+            font=("Arial", 12),
+            bg="#27ae60",
+            fg="white",
+            relief="flat",
+            padx=20,
+            pady=8,
+            command=self.register_as_customer
+        )
+        customer_button.pack(pady=5, fill="x")
         
-    def show_status(self, message, is_error=False):
-        """Show status message"""
-        color = self.error_color if is_error else self.success_color
-        self.status_label.config(text=message, fg=color)
+        donor_button = tk.Button(
+            register_frame,
+            text="Register as Donor",
+            font=("Arial", 12),
+            bg="#e74c3c",
+            fg="white",
+            relief="flat",
+            padx=20,
+            pady=8,
+            command=self.register_as_donor
+        )
+        donor_button.pack(pady=5, fill="x")
+    
+    def _create_form_field(self, parent, label_text, show=None):
+        """Helper method to create form fields"""
+        field_frame = tk.Frame(parent, bg="#34495e")
+        field_frame.pack(fill="x", padx=20, pady=8)
         
+        label = tk.Label(
+            field_frame,
+            text=label_text,
+            font=("Arial", 11),
+            bg="#34495e",
+            fg="#ecf0f1"
+        )
+        label.pack(anchor="w", pady=(0, 3))
+        
+        entry = tk.Entry(
+            field_frame,
+            font=("Arial", 12),
+            relief="solid",
+            borderwidth=1,
+            bg="#ecf0f1",
+            fg="#2c3e50",
+            show=show
+        )
+        entry.pack(fill="x", ipady=8)
+        
+        return entry
+    
     def handle_login(self):
-        """Handle login button click"""
-        email = self.email_var.get().strip()
-        password = self.password_var.get().strip()
+        """Handle the login process"""
+        email = self.email_entry.get().strip()
+        password = self.password_entry.get().strip()
         
-        # Clear previous messages
-        self.clear_status()
-        
-        # Basic validation
-        if not email:
-            error_msg = "Please enter your email address."
-            self.show_status(error_msg, True)
-            # Show popup warning for empty email
-            messagebox.showwarning("Missing Email", error_msg)
-            self.email_entry.focus()
+        if not email or not password:
+            messagebox.showerror("Error", "Please fill in all fields.")
             return
-            
-        if not password:
-            error_msg = "Please enter your password."
-            self.show_status(error_msg, True)
-            # Show popup warning for empty password
-            messagebox.showwarning("Missing Password", error_msg)
-            self.password_entry.focus()
-            return
-        
-        # Disable login button during processing
-        self.login_button.config(state="disabled", text="Logging in...")
-        self.root.update()
         
         try:
-            # Attempt login using CredentialController
             success, message, user_data = self.credential_controller.login(email, password)
             
             if success:
-                self.current_user = user_data
-                self.show_status(f"Login successful! Welcome {user_data['name']}", False)
-                
-                # Show success message with user role
-                messagebox.showinfo("Login Successful", 
-                                  f"Welcome {user_data['name']}!\n"
-                                  f"Role: {user_data['role'].title()}\n"
-                                  f"Email: {user_data['email']}")
-                
-                # Here you would navigate to the appropriate screen based on role
-                self.navigate_to_main_screen(user_data)
-                
+                messagebox.showinfo("Success", "Login successful!")
+                self.root.destroy()
+                self.credential_controller.open_user_main_screen(user_data)
             else:
-                # Show error message both on screen and as popup warning
-                self.show_status(message, True)
-                
-                # Show popup warning for invalid credentials
-                messagebox.showerror("Login Failed", 
-                                   f"{message}\n\n"
-                                   f"Please check your credentials and try again.")
+                messagebox.showerror("Login Failed", message)
+                self.password_entry.delete(0, tk.END)
                 
         except Exception as e:
-            error_msg = f"System error: {str(e)}"
-            self.show_status(error_msg, True)
-            
-            # Show popup warning for system errors
-            messagebox.showerror("System Error", 
-                               f"Login failed due to system error.\n\n"
-                               f"Error details: {str(e)}\n\n"
-                               f"Please try again or contact support.")
-            print(f"Login error: {e}")  # For debugging
-            
-        finally:
-            # Re-enable login button
-            self.login_button.config(state="normal", text="Login")
-            
-    def handle_register(self):
-        """Handle register button click"""
-        messagebox.showinfo("Register", 
-                           "Registration feature will be implemented soon!\n\n"
-                           "For now, please contact an administrator to create your account.")
-        
-    def navigate_to_main_screen(self, user_data):
-        """Navigate to main screen based on user role"""
-        role = user_data['role']
-        
-        # Hide the login screen
-        self.root.withdraw()
-        
-        try:
-            # Use CredentialController to open the appropriate main screen
-            success = self.credential_controller.open_user_main_screen(user_data)
-            
-            if not success:
-                # If screen opening failed, show error and restore login screen
-                messagebox.showerror("Navigation Error", 
-                                   f"Failed to open {role} main screen.\n"
-                                   f"Please contact support.")
-                self.show_login_screen()
-        
-        except Exception as e:
-            # Handle any navigation errors
-            messagebox.showerror("Navigation Error", 
-                               f"Error opening main screen: {str(e)}\n"
-                               f"Please contact support.")
-            self.show_login_screen()
+            messagebox.showerror("Error", f"Login failed: {str(e)}")
     
-    def show_login_screen(self):
-        """Show the login screen again"""
-        self.root.deiconify()
-        self.logout()
+    def register_as_customer(self):
+        """Open registration form for customer role"""
+        try:
+            print("Attempting to import RegisterFormScreen...")
+            from GUI.RegisterFormScreen import RegisterFormScreen
+            print("Import successful!")
+            
+            print("Hiding login window...")
+            self.root.withdraw()
+            
+            print("Creating RegisterFormScreen...")
+            register_screen = RegisterFormScreen(role="customer", parent_window=self.root)
+            
+            print("Displaying RegisterFormScreen...")
+            register_screen.display()
+            
+        except ImportError as e:
+            error_msg = f"Cannot import RegisterFormScreen: {e}"
+            print(f" {error_msg}")
+            messagebox.showerror("Import Error", error_msg)
+        except Exception as e:
+            error_msg = f"Error opening registration: {e}"
+            print(f"{error_msg}")
+            messagebox.showerror("Error", error_msg)
+    
+    def register_as_donor(self):
+        """Open registration form for donor role"""
+        try:
+            print("Attempting to import RegisterFormScreen...")
+            from GUI.RegisterFormScreen import RegisterFormScreen
+            print("Import successful!")
+            
+            print("Hiding login window...")
+            self.root.withdraw()
+            
+            print("Creating RegisterFormScreen...")
+            register_screen = RegisterFormScreen(role="donor", parent_window=self.root)
+            
+            print("Displaying RegisterFormScreen...")
+            register_screen.display()
+            
+        except ImportError as e:
+            error_msg = f"Cannot import RegisterFormScreen: {e}"
+            print(f"{error_msg}")
+            messagebox.showerror("Import Error", error_msg)
+        except Exception as e:
+            error_msg = f"Error opening registration: {e}"
+            print(f" {error_msg}")
+            messagebox.showerror("Error", error_msg)
+    
+    def toggle_fullscreen(self, event=None):
+        """Toggle fullscreen mode"""
+        self.is_fullscreen = not self.is_fullscreen
+        self.root.attributes('-fullscreen', self.is_fullscreen)
         
-    def logout(self):
-        """Clear form and reset for new login"""
-        self.email_var.set("")
-        self.password_var.set("")
-        self.clear_status()
-        self.current_user = None
-        self.email_entry.focus()
+        if self.is_fullscreen:
+            
+            self.root.configure(bg="#2c3e50")
         
-    def run(self):
-        """Start the application"""
-        self.email_entry.focus()
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        return "break"
+    
+    def exit_fullscreen(self, event=None):
+        """Exit fullscreen mode"""
+        self.is_fullscreen = False
+        self.root.attributes('-fullscreen', False)
+        return "break"
+    
+    def display(self):
+        """Display the login screen"""
         self.root.mainloop()
-        
-    def on_closing(self):
-        """Handle window closing"""
-        self.root.destroy()
 
-def main():
-    """Main function"""
-    try:
-        app = LoginScreen()
-        app.run()
-    except Exception as e:
-        print(f"Application error: {e}")
-        messagebox.showerror("Application Error", f"Failed to start application:\n{e}")
 
-if __name__ == "__main__":
-    main()

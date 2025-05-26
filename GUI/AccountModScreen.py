@@ -1,93 +1,211 @@
 import tkinter as tk
 from tkinter import messagebox
-from CredentialController import CredentialController
 
-# Define main menu callbacks for each user type.
-
-def open_admin_main_screen(parent):
-    print("Opening Admin Main Screen...")  
-    parent.deiconify()
-
-def open_customer_main_screen(parent):
-    print("Opening Customer Main Sreen...")
-    parent.deiconify()
-
-def open_donor_main_screen(parent):
-    print("Opening Donor Main Screen...")
-    parent.deiconify()
-
-def open_drop_off_agent_main_screen(parent):
-    print("Opening Drop-Off Agent Main Screen...")
-    parent.deiconify()
-
-# Function to determine the correct main menu callback given the parent window.
-def get_main_screen_callback(user_role, parent):
-    callbacks = {
-        "admin": open_admin_main_screen,
-        "customer": open_customer_main_screen,
-        "donor": open_donor_main_screen,
-        "drop_off_agent": open_drop_off_agent_main_screen
-    }
-    # Return a lambda that calls the corresponding function with the parent window.
-    return lambda: callbacks[user_role](parent)
 
 class AccountModScreen:
-    def __init__(self, parent, user_role):
+    def __init__(self, parent_window=None, role=None, user_data=None):
+        """Account Modification Screen with ALL required elements"""
         
-        self.controller = CredentialController()
-        self.parent = parent
+        # Handle different calling patterns
+        if isinstance(parent_window, dict):
+            self.user_data = parent_window
+            self.parent_window = role
+            self.role = self.user_data.get('role') if self.user_data else None
+        else:
+            self.parent_window = parent_window
+            self.role = role
+            self.user_data = user_data
         
-        self.main_screen_callback = get_main_screen_callback(user_role, parent)
+        # Import CredentialController
+        from CredentialController import CredentialController
+        self.credential_controller = CredentialController()
         
-        self.window = tk.Toplevel(self.parent)
-        self.window.title("Modify Account")
-        self.window.geometry("400x450")  # Made shorter since no address field
+        self.root = tk.Toplevel() if self.parent_window else tk.Tk()
+        self.root.title("Account Settings - FoodShare")
+        self.root.geometry("500x800")
+        self.root.configure(bg="#f0f0f0")
+        self.root.resizable(False, False)
+        
+        if self.parent_window:
+            self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        
+        if self.user_data:
+            self.setup_ui()
 
-    def displayAccountModScreen(self, user_id):
-        self.user_id = user_id
+    def displayAccountModScreen(self, user_id=None):
+        """Display the account screen and fetch user data if needed"""
+        if not self.user_data and user_id:
+            try:
+                user_data = self.credential_controller.diondb.get_user_by_id(user_id)
+                if user_data:
+                    self.user_data = user_data
+                else:
+                    messagebox.showerror("Error", "Could not load user data")
+                    return
+            except Exception as e:
+                print(f"Error fetching user data: {e}")
+                messagebox.showerror("Error", "Could not load user data")
+                return
+        
+        if not hasattr(self, '_ui_setup'):
+            self.setup_ui()
+        
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_set()
 
-        def submit_changes():
-            updates = {
-                "name": self.name_entry.get().strip(),
-                "surname": self.surname_entry.get().strip(),
-                "username": self.username_entry.get().strip(),
-                "email": self.email_entry.get().strip(),
-                "password": self.password_entry.get().strip(),
-                "phone": self.phone_entry.get().strip()
-                # REMOVED: "address" field since column was deleted from users table
-            }
+    def setup_ui(self):
+        """Setup the complete UI with ALL elements"""
+        self._ui_setup = True
+        
+        # Clear any existing widgets
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        # MAIN CONTAINER
+        main_container = tk.Frame(self.root, bg="#f0f0f0")
+        main_container.pack(fill="both", expand=True, padx=20, pady=20)
 
-            # Send updates to controller 
-            success, message = self.controller.update(self.user_id, updates)
+        # TITLE
+        title_label = tk.Label(
+            main_container,
+            text="Account Settings",
+            font=("Arial", 20, "bold"),
+            bg="#f0f0f0",
+            fg="#2c3e50"
+        )
+        title_label.pack(pady=(0, 10))
 
+        # CURRENT USER
+        user_label = tk.Label(
+            main_container,
+            text=f"Current User: {self.user_data.get('name', '')} {self.user_data.get('surname', '')}",
+            font=("Arial", 14),
+            bg="#f0f0f0",
+            fg="#34495e"
+        )
+        user_label.pack(pady=(0, 20))
+
+        # FORM CONTAINER
+        form_container = tk.Frame(main_container, bg="#ffffff", relief="solid", bd=2)
+        form_container.pack(fill="both", expand=True)
+
+        # ALL FORM FIELDS
+        fields_container = tk.Frame(form_container, bg="#ffffff")
+        fields_container.pack(fill="both", expand=True, padx=30, pady=30)
+
+        # NAME FIELD
+        tk.Label(fields_container, text="Name:", font=("Arial", 12, "bold"), bg="#ffffff").pack(anchor="w")
+        self.name_entry = tk.Entry(fields_container, font=("Arial", 12), width=40)
+        self.name_entry.pack(fill="x", pady=(5, 15), ipady=5)
+
+        # SURNAME FIELD
+        tk.Label(fields_container, text="Surname:", font=("Arial", 12, "bold"), bg="#ffffff").pack(anchor="w")
+        self.surname_entry = tk.Entry(fields_container, font=("Arial", 12), width=40)
+        self.surname_entry.pack(fill="x", pady=(5, 15), ipady=5)
+
+        # USERNAME FIELD
+        tk.Label(fields_container, text="Username:", font=("Arial", 12, "bold"), bg="#ffffff").pack(anchor="w")
+        self.username_entry = tk.Entry(fields_container, font=("Arial", 12), width=40)
+        self.username_entry.pack(fill="x", pady=(5, 15), ipady=5)
+
+        # EMAIL FIELD
+        tk.Label(fields_container, text="Email:", font=("Arial", 12, "bold"), bg="#ffffff").pack(anchor="w")
+        self.email_entry = tk.Entry(fields_container, font=("Arial", 12), width=40)
+        self.email_entry.pack(fill="x", pady=(5, 15), ipady=5)
+
+        # PHONE FIELD
+        tk.Label(fields_container, text="Phone:", font=("Arial", 12, "bold"), bg="#ffffff").pack(anchor="w")
+        self.phone_entry = tk.Entry(fields_container, font=("Arial", 12), width=40)
+        self.phone_entry.pack(fill="x", pady=(5, 15), ipady=5)
+
+        # PASSWORD FIELD
+        tk.Label(fields_container, text="Password:", font=("Arial", 12, "bold"), bg="#ffffff").pack(anchor="w")
+        self.password_entry = tk.Entry(fields_container, font=("Arial", 12), width=40, show="*")
+        self.password_entry.pack(fill="x", pady=(5, 30), ipady=5)
+
+        # BUTTONS CONTAINER
+        buttons_container = tk.Frame(fields_container, bg="#ffffff")
+        buttons_container.pack(fill="x", pady=20)
+
+        # SUBMIT BUTTON
+        submit_btn = tk.Button(
+            buttons_container,
+            text="SUBMIT CHANGES",
+            font=("Arial", 14, "bold"),
+            bg="#27ae60",
+            fg="white",
+            width=25,
+            height=2,
+            command=self.submit_changes
+        )
+        submit_btn.pack(pady=10)
+
+        
+        
+
+        # POPULATE FIELDS WITH CURRENT DATA
+        self._populate_fields()
+
+    def _populate_fields(self):
+        """Fill fields with current user data"""
+        if self.user_data:
+            self.name_entry.insert(0, self.user_data.get('name', ''))
+            self.surname_entry.insert(0, self.user_data.get('surname', ''))
+            self.username_entry.insert(0, self.user_data.get('username', ''))
+            self.email_entry.insert(0, self.user_data.get('email', ''))
+            self.phone_entry.insert(0, self.user_data.get('phone', ''))
+            # Show current password
+            current_password = self.user_data.get('password', '')
+            if current_password:
+                self.password_entry.insert(0, current_password)
+
+    def submit_changes(self):
+        """Save all changes to database"""
+        print("SUBMIT CHANGES CLICKED!")  # Debug
+        
+        name = self.name_entry.get().strip()
+        surname = self.surname_entry.get().strip()
+        username = self.username_entry.get().strip()
+        email = self.email_entry.get().strip()
+        phone = self.phone_entry.get().strip()
+        password = self.password_entry.get().strip()
+        
+        updates = {}
+        if name: updates["name"] = name
+        if surname: updates["surname"] = surname
+        if username: updates["username"] = username
+        if email: updates["email"] = email
+        if phone: updates["phone"] = phone
+        if password: updates["password"] = password
+        
+        if not updates:
+            messagebox.showwarning("No Changes", "Please enter information to update")
+            return
+        
+        try:
+            success, message = self.credential_controller.update(self.user_data['id'], updates)
             if success:
-                messagebox.showinfo("Success", message)
+                messagebox.showinfo("Success", "Account updated successfully!")
+                self.back_to_main()
             else:
-                messagebox.showerror("Error", message)
+                messagebox.showerror("Update Failed", message)
+        except Exception as e:
+            messagebox.showerror("Error", f"Update failed: {str(e)}")
 
-        # GUI Layout for Account Modification Screen
-        tk.Label(self.window, text="Update Account Info", font=("Helvetica", 16)).pack(pady=10)
+    def back_to_main(self):
+        """Return to main screen"""
+        print("BACK TO MAIN CLICKED!")  # Debug
+        self.root.destroy()
+        if self.parent_window:
+            self.parent_window.deiconify()
+            self.parent_window.focus_set()
 
-        self.name_entry = self._add_labeled_entry("Name")
-        self.surname_entry = self._add_labeled_entry("Surname")
-        self.username_entry = self._add_labeled_entry("Username")
-        self.email_entry = self._add_labeled_entry("Email")
-        self.password_entry = self._add_labeled_entry("Password", show="*")
-        self.phone_entry = self._add_labeled_entry("Phone")
-        # REMOVED: self.address_entry since address column was deleted
+    def on_close(self):
+        """Handle window closing"""
+        self.back_to_main()
 
-        tk.Button(self.window, text="Submit Changes", command=submit_changes).pack(pady=20)
-
-        # "Main Screen" button to return to the main screen.
-        tk.Button(self.window, text="Main Screen", command=self.go_to_main_screen,
-                  bg="#FFA500", fg="white").pack(pady=10)
-
-    def _add_labeled_entry(self, label, show=None):
-        tk.Label(self.window, text=label).pack()
-        entry = tk.Entry(self.window, show=show) if show else tk.Entry(self.window)
-        entry.pack()
-        return entry
-
-    def go_to_main_screen(self):
-        self.window.destroy()  # Close the account modification window.
-        self.main_screen_callback()  # Re-display the main screen
+    def display(self):
+        """Display the screen"""
+        if hasattr(self, 'root'):
+            self.root.mainloop()

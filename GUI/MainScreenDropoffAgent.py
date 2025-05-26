@@ -72,7 +72,7 @@ class MainScreenDropoffAgent:
         # Hide the drop-off agent main screen while the account modification window is active.
         self.root.withdraw()
         # Open the AccountModScreen for a drop-off agent.
-        account_screen = AccountModScreen(self.root, "drop_off_agent")
+        account_screen = AccountModScreen(self.root, "dropoffagent")
         
         account_screen.displayAccountModScreen(user_id=self.user_id)
     

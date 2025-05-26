@@ -195,25 +195,26 @@ class Database:
             self.connection.commit()
             return True  # User created successfully
 
-    # Get user by email for login functionality
+    # Get user by email for login functionality - UPDATED to include username
     def get_user_by_email(self, email):
         """
         Retrieves user data by email for login authentication.
         Returns user data as dictionary or None if not found.
         """
         try:
-            query = "SELECT id, name, surname, email, password, phone, role FROM users WHERE email = %s"
+            query = "SELECT id, username, name, surname, email, password, phone, role FROM users WHERE email = %s"
             result = self.execute_query(query, (email,))
             
             if result:
                 user_data = {
                     'id': result[0][0],
-                    'name': result[0][1],
-                    'surname': result[0][2],
-                    'email': result[0][3],
-                    'password': result[0][4],
-                    'phone': result[0][5],
-                    'role': result[0][6]
+                    'username': result[0][1],
+                    'name': result[0][2],
+                    'surname': result[0][3],
+                    'email': result[0][4],
+                    'password': result[0][5],
+                    'phone': result[0][6],
+                    'role': result[0][7]
                 }
                 return user_data
             else:
@@ -230,17 +231,18 @@ class Database:
         Returns user data as dictionary or None if not found.
         """
         try:
-            query = "SELECT id, name, surname, email, phone, role FROM users WHERE id = %s"
+            query = "SELECT id, username, name, surname, email, phone, role FROM users WHERE id = %s"
             result = self.execute_query(query, (user_id,))
             
             if result:
                 user_data = {
                     'id': result[0][0],
-                    'name': result[0][1],
-                    'surname': result[0][2],
-                    'email': result[0][3],
-                    'phone': result[0][4],
-                    'role': result[0][5]
+                    'username': result[0][1],
+                    'name': result[0][2],
+                    'surname': result[0][3],
+                    'email': result[0][4],
+                    'phone': result[0][5],
+                    'role': result[0][6]
                 }
                 return user_data
             else:
@@ -249,12 +251,115 @@ class Database:
         except mysql.connector.Error as err:
             print(f"Database error in get_user_by_id: {err}")
             return None
-    
-    # Check if email exists
+    # MOVED FROM CREDENTIALCONTROLLER: Create customer user
+    def create_customer_user(self, customer_obj):
+        """
+        Creates a new customer user in the database.
+        Returns the user_id if successful, None if failed.
+        """
+        try:
+            # Insert into users table first
+            query = """
+                INSERT INTO users (username, name, surname, email, password, phone, role) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            params = (
+                customer_obj.username,
+                customer_obj.name,
+                customer_obj.surname,
+                customer_obj.email,
+                customer_obj.get_password(),
+                customer_obj.phone_number,
+                'customer'
+            )
+            
+            self.cursor.execute(query, params)
+            user_id = self.cursor.lastrowid
+            
+            # If you have a separate customers table for customer-specific data:
+            # customer_query = "INSERT INTO customers (user_id) VALUES (%s)"
+            # self.cursor.execute(customer_query, (user_id,))
+            
+            self.connection.commit()
+            
+            print(f"Customer user {customer_obj.email} created successfully with ID: {user_id}")
+            return user_id
+            
+        except mysql.connector.Error as err:
+            print(f"Database error in create_customer_user: {err}")
+            self.connection.rollback()
+            return None
+        # MOVED FROM CREDENTIALCONTROLLER: Create donor user
+    def create_donor_user(self, donor_obj):
+        """
+        Creates a new donor user in the database.
+        Returns the user_id if successful, None if failed.
+        """
+        try:
+            # Insert into users table first
+            query = """
+                INSERT INTO users (username, name, surname, email, password, phone, role) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            params = (
+                donor_obj.username,
+                donor_obj.name,
+                donor_obj.surname,
+                donor_obj.email,
+                donor_obj.get_password(),
+                donor_obj.phone_number,
+                'donor'
+            )
+            
+            self.cursor.execute(query, params)
+            user_id = self.cursor.lastrowid
+            
+            self.connection.commit()
+            
+            print(f"Donor user {donor_obj.email} created successfully with ID: {user_id}")
+            return user_id
+            
+        except mysql.connector.Error as err:
+            print(f"Database error in create_donor_user: {err}")
+            self.connection.rollback()
+            return None
+
+    # Create a new user in the database - UPDATED to return user_id
+    def create_user(self, user_data):
+        """
+        Creates a basic user in the database (for admin, dropoffagent, etc.).
+        Returns the user_id if successful, None if failed.
+        """
+        try:
+            query = """
+                INSERT INTO users (username, name, surname, email, password, phone, role) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            params = (
+                user_data['username'],
+                user_data['name'],
+                user_data['surname'],
+                user_data['email'],
+                user_data['password'],
+                user_data['phone'],
+                user_data['role']
+            )
+            
+            self.cursor.execute(query, params)
+            user_id = self.cursor.lastrowid
+            self.connection.commit()
+            
+            print(f"User {user_data['email']} created successfully with ID: {user_id}")
+            return user_id
+            
+        except mysql.connector.Error as err:
+            print(f"Database error in create_user: {err}")
+            self.connection.rollback()
+            return None
+
     def email_exists(self, email):
         """
         Checks if an email already exists in the database.
-        Returns True if exists, False otherwise.
         """
         try:
             query = "SELECT COUNT(*) FROM users WHERE email = %s"
@@ -291,7 +396,7 @@ class Database:
                 return False, "Phone number must be exactly 10 digits."
             
             # Select fields that exist in the database
-            fields_to_select = ['name', 'surname', 'email', 'password', 'phone', 'role']
+            fields_to_select = ['name', 'surname', 'username', 'email', 'password', 'phone', 'role']
             current_query = f"SELECT {', '.join(fields_to_select)} FROM users WHERE id = %s"
             result = self.execute_query(current_query, (user_id,))
 

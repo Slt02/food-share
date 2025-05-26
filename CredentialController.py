@@ -2,11 +2,11 @@ import re
 from Database import Database
 
 
+
 class CredentialController:
     def __init__(self):
-        self.Database = Database() # Create a new instance of the Database class 
+        self.Database = Database() 
 
-    
     def login(self, email, password):
         """
         Authenticates user credentials against the database.
@@ -22,7 +22,7 @@ class CredentialController:
         
         try:
             # Query database to find user with matching email
-            user_data = self.Database.get_user_by_email(email) # CHANGE DB EVERY TIME!!!!
+            user_data = self.Database.get_user_by_email(email)
             
             if user_data is None:
                 return False, "Invalid email or password.", None
@@ -40,36 +40,153 @@ class CredentialController:
             print(f"Database error during login: {e}")
             return False, "Login failed due to system error.", None
     
-    
+    def register(self, name, surname, email, password, phone, role):
+        """
+        Registers a new user and creates appropriate Customer/Donor object.
+        Returns (success, message, user_object) tuple.
+        """
+        try:
+            # Validate name fields
+            name_valid, name_msg = self.validate_name_field(name)
+            if not name_valid:
+                return False, f"First name error: {name_msg}", None
+            
+            surname_valid, surname_msg = self.validate_name_field(surname)
+            if not surname_valid:
+                return False, f"Last name error: {surname_msg}", None
+            
+            # Validate email format
+            if not self.validate_email(email):
+                return False, "Invalid email format.", None
+            
+            # Check if email already exists
+            existing_user = self.Database.get_user_by_email(email)
+            if existing_user is not None:
+                return False, "An account with this email already exists.", None
+            
+            # Validate password strength
+            password_valid, password_msg = self.validate_password_strength(password)
+            if not password_valid:
+                return False, password_msg, None
+            
+            # Validate phone number
+            if not self.validate_phone(phone):
+                return False, "Phone number must be exactly 10 digits.", None
+            
+            # Validate role
+            valid_roles = ['customer', 'donor', 'admin', 'dropoffagent']
+            if role not in valid_roles:
+                return False, "Invalid role specified.", None
+            
+            # Generate username from email (before @ symbol)
+            username = email.split('@')[0]
+            
+            # Create the appropriate object based on role
+            if role == 'customer':
+                # Import Customer class
+                from Users.Customer import Customer
+                
+                # Create Customer object
+                customer_obj = Customer(
+                    username=username,
+                    name=name.strip(),
+                    surname=surname.strip(),
+                    password=password,
+                    email=email.strip().lower(),
+                    phone_number=phone.strip(),
+                    customer_id=None  # Will be set after database insertion
+                )
+                
+                # Store customer in database
+                user_id = self.Database.create_customer_user(customer_obj)
+                
+                if user_id:
+                    customer_obj.user_id = user_id  # Set the ID returned from database
+                    return True, f"Welcome to FoodShare! Your customer account has been created successfully.", customer_obj
+                else:
+                    return False, "Failed to create customer account. Please try again.", None
+                    
+            elif role == 'donor':
+                # Import Donor class
+                from Users.Donor import Donor
+                
+                # Create Donor object
+                donor_obj = Donor(
+                    username=username,
+                    name=name.strip(),
+                    surname=surname.strip(),
+                    password=password,
+                    email=email.strip().lower(),
+                    phone_number=phone.strip(),
+                    donor_id=None  # Will be set after database insertion
+                )
+                
+                # Store donor in database
+                user_id = self.Database.create_donor_user(donor_obj)
+                
+                if user_id:
+                    donor_obj.user_id = user_id  # Set the ID returned from database
+                    return True, f"Welcome to FoodShare! Your donor account has been created successfully.", donor_obj
+                else:
+                    return False, "Failed to create donor account. Please try again.", None
+            
+            else:
+                # For admin and dropoffagent, create basic user record for now
+                # You can extend this later if you have Admin/DropoffAgent classes
+                user_data = {
+                    'name': name.strip(),
+                    'surname': surname.strip(),
+                    'username': username,
+                    'email': email.strip().lower(),
+                    'password': password,
+                    'phone': phone.strip(),
+                    'role': role
+                }
+                
+                user_id = self.Database.create_user(user_data)
+                
+                if user_id:
+                    safe_user_data = {k: v for k, v in user_data.items() if k != 'password'}
+                    safe_user_data['id'] = user_id
+                    return True, f"Welcome to FoodShare! Your {role} account has been created successfully.", safe_user_data
+                else:
+                    return False, "Failed to create account. Please try again.", None
+                    
+        except Exception as e:
+            print(f"Registration error: {e}")
+            return False, "Registration failed due to system error.", None
+
     def open_user_main_screen(self, user_data):
-        """
-        Opens the appropriate main screen based on user role.
-        """
+        
         role = user_data['role']
         
         try:
             if role == 'admin':
-                # Import inside the method to avoid circular imports
                 from GUI.MainScreenAdmin import MainScreenAdmin
-                screen = MainScreenAdmin(user_data)  # Pass user_data
+                # MainScreenAdmin expects: (root=None, user_data=None)
+                screen = MainScreenAdmin(root=None, user_data=user_data)
                 screen.display()
                 
             elif role == 'customer':
-                # Import inside the method to avoid circular imports
                 from GUI.MainScreenCustomer import CustomerMainScreen
-                screen = CustomerMainScreen(user_data)  # Pass user_data
+                # FIXED: CustomerMainScreen expects customer_id, but we need to pass user_data
+                # We'll create a wrapper to handle this inconsistency
+                screen = CustomerMainScreen(root=None, customer_id=user_data.get('id'))
+                # Store user_data as an attribute for consistency
+                screen.user_data = user_data
+                screen.user_id = user_data.get('id')
                 screen.display()
                 
             elif role == 'donor':
-                # Import inside the method to avoid circular imports
                 from GUI.MainScreenDonor import MainScreenDonor
-                screen = MainScreenDonor(user_data)  # Pass user_data
+                # MainScreenDonor expects: (user_data=None)
+                screen = MainScreenDonor(user_data=user_data)
                 screen.display()
                 
             elif role == 'dropoffagent':
-                # Import inside the method to avoid circular imports
                 from GUI.MainScreenDropoffAgent import MainScreenDropoffAgent
-                screen = MainScreenDropoffAgent(user_data)  # Pass user_data
+                # MainScreenDropoffAgent expects: (user_data=None)
+                screen = MainScreenDropoffAgent(user_data=user_data)
                 screen.display()
                 
             else:
@@ -86,11 +203,8 @@ class CredentialController:
             print(f"Error opening screen for role {role}: {e}")
             return False
     
-    
     def get_user_dashboard_route(self, user_role):
-        """
-        Returns the appropriate dashboard route based on user role.
-        """
+        
         dashboard_routes = {
             'admin': 'admin_dashboard',
             'customer': 'customer_main_screen',
@@ -99,7 +213,6 @@ class CredentialController:
         }
         
         return dashboard_routes.get(user_role, 'customer_main_screen')  # Default to customer
-    
     
     def check_user_permissions(self, user_role, required_permission):
         """
@@ -115,19 +228,17 @@ class CredentialController:
         user_permissions = permissions.get(user_role, [])
         return required_permission in user_permissions
     
-    
     def validate_email(self, email):
-        
-       # Checks if the email format is valid.
+        """Checks if the email format is valid."""
+        if not email or not email.strip():
+            return False
         email_regex = r'^[\w\.-]+@[\w\.-]+\.\w{2,}$'
-        return re.match(email_regex, email) is not None
+        return re.match(email_regex, email.strip()) is not None
 
-    
-    
-    
     def validate_password_strength(self, password):
-        
-        #Checks if password is strong (length, uppercase, number, symbol).
+        """Checks if password is strong (length, uppercase, number, symbol)."""
+        if not password:
+            return False, "Password cannot be empty."
         if len(password) < 8:
             return False, "Password must be at least 8 characters."
         if not re.search(r'[A-Z]', password):
@@ -135,16 +246,12 @@ class CredentialController:
         if not re.search(r'[0-9]', password):
             return False, "Password must include at least one number."
         if not re.search(r'[\W_]', password):
-            return False, "Password must include at least one symbol."
+            return False, "Password must include at least one special character."
 
         return True, "Password is strong."
 
-    
-    
-    
     def validate_credentials(self, email, password, phone=None):
-        
-        #Validates credentials with simple checks.
+        """Validates credentials with simple checks."""
         if not self.validate_email(email):
             print("Invalid email format.")
             return False
@@ -155,23 +262,17 @@ class CredentialController:
             return False
 
         if phone is not None:
-            valid_phone, phone_message = self.validate_phone_format(phone)
-            if not valid_phone:
-                print(f"Phone error: {phone_message}")
+            if not self.validate_phone(phone):
+                print("Phone number must be exactly 10 digits.")
                 return False
 
         print("Email, password, and phone format are valid.")
         return True
 
-    
-    
-    
-
-
     def validate_phone(self, phone):
         """Validates phone number format (must be exactly 10 digits)"""
-        if not phone.strip():
-            return True  # Allow empty phone numbers
+        if not phone or not phone.strip():
+            return False  # Phone is required
         
         # Remove all non-digit characters for validation
         digits_only = re.sub(r'\D', '', phone)
@@ -182,10 +283,9 @@ class CredentialController:
         
         return True
     
-    
     def validate_name_field(self, name):
         """Validates name fields (name, surname, username)"""
-        if not name.strip():
+        if not name or not name.strip():
             return False, "Field cannot be empty."
         
         if len(name.strip()) < 2:
@@ -197,13 +297,10 @@ class CredentialController:
         
         return True, "Valid."
     
-    
-    
     def update(self, user_id, updated_info):
         """Updates user information using the database method"""
-        return self.Database.update_account_info(user_id, updated_info, self) # change DB EVERY TIME!!!!!
+        return self.Database.update_account_info(user_id, updated_info, self)
 
-        
     def update_name(self, user_id, new_name):
         return self.update(user_id, {"name": new_name})
 
@@ -214,11 +311,7 @@ class CredentialController:
         return self.update(user_id, {"username": new_username})
 
     def update_email(self, user_id, new_email):
-        
-        #Updates user's email after validating format.
-        
+        """Updates user's email after validating format."""
         if not self.validate_email(new_email):
             return False, "Invalid email format."
         return self.update(user_id, {"email": new_email})
-
-    

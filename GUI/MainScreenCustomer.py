@@ -12,6 +12,7 @@ class CustomerMainScreen:
         
         # Store user data and get the real user ID
         self.customer_id = customer_id
+        self.user = customer_id
         
         # Display welcome message with user name
         welcome_text = "Welcome - Customer Main Screen"

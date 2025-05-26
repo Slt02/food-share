@@ -6,7 +6,7 @@ from GUI.DropOffRegistrationScreen import DropOffRegistrationScreen
 
 class MainScreenAdmin:
     def __init__(self, root=None, user_data=None):
-        self.root = tk.Tk() if root is None else root # Create a new Tkinter root window if not provided
+        self.root = tk.Tk() if root is None else root 
         self.root.title("Admin Main Screen")
         self.root.geometry("400x500")
         
