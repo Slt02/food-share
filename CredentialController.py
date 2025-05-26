@@ -1,11 +1,13 @@
 import re
 from Database import Database
+import time
+from datetime import datetime, timedelta
 
 
 class CredentialController:
     def __init__(self):
         self.Database = Database() # Create a new instance of the Database class 
-
+        self._attempts = {}
     
     def login(self, email, password):
         """
@@ -15,6 +17,12 @@ class CredentialController:
         # First validate email format
         if not self.validate_email(email):
             return False, "Invalid email format.", None
+        
+        # lockout check
+        info = self._attempts.get(email, {"fails": 0, "lock_until": None})
+        if info["lock_until"] and datetime.now() < info["lock_until"]:
+            mins = int((info["lock_until"] - datetime.now()).total_seconds() // 60) + 1
+            return False, f"Account locked. Try again in {mins} minute(s).", None
         
         # Check if password is provided
         if not password or password.strip() == "":
@@ -32,14 +40,29 @@ class CredentialController:
             if user_data.get('password') == password:
                 # Remove password from user_data before returning for security
                 safe_user_data = {k: v for k, v in user_data.items() if k != 'password'}
+                success = user_data and user_data.get('password') == password
+            if success:
+                self._attempts.pop(email, None)          # clean slate on success
+                safe_user_data = {k: v for k, v in user_data.items() if k != 'password'}
                 return True, "Login successful.", safe_user_data
             else:
-                return False, "Invalid email or password.", None
+                info["fails"] += 1
+                if info["fails"] >= 5:
+                    info["lock_until"] = datetime.now() + timedelta(minutes=10)
+                    info["fails"] = 0                    # reset counter after lockout
+                self._attempts[email] = info
+
+                # Compose proper failure message
+                msg = ("Account locked for 10 minutes due to repeated failures."
+                       if info.get("lock_until") else
+                       "Invalid email or password.")
+                return False, msg, None
+
                 
         except Exception as e:
             print(f"Database error during login: {e}")
-            return False, "Login failed due to system error.", None
-    
+            return False, "Login failed due to system error.", None     
+
     
     def open_user_main_screen(self, user_data):
         """
