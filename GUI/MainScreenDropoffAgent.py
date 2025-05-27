@@ -63,10 +63,10 @@ class MainScreenDropoffAgent:
         messagebox.showinfo("Update Delivery Status", "Update Delivery Status clicked. (Not implemented)")
 
     def assign_delivery(self):
-        messagebox.showinfo("Assign Delivery", "Assign Delivery button clicked. (Not implemented)")
+        AvailableRequestsScreen(self.root, self.user_id)
 
     def view_available_requests(self):
-        messagebox.showinfo("View Available Requests", "View Available Requests button clicked. (Not implemented)")
+        AvailableRequestsScreen(self.root, self.user_id)
 
     def manage_account(self):
         # Hide the drop-off agent main screen while the account modification window is active.
