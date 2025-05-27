@@ -22,9 +22,8 @@ class AccountModScreen:
         
         self.root = tk.Toplevel() if self.parent_window else tk.Tk()
         self.root.title("Account Settings - FoodShare")
-        self.root.geometry("500x800")
+        self.root.state('zoomed')
         self.root.configure(bg="#f0f0f0")
-        self.root.resizable(False, False)
         
         if self.parent_window:
             self.root.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -36,7 +35,7 @@ class AccountModScreen:
         """Display the account screen and fetch user data if needed"""
         if not self.user_data and user_id:
             try:
-                user_data = self.credential_controller.diondb.get_user_by_id(user_id)
+                user_data = self.credential_controller.Database.get_user_by_id(user_id)
                 if user_data:
                     self.user_data = user_data
                 else:
@@ -62,13 +61,25 @@ class AccountModScreen:
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # MAIN CONTAINER
-        main_container = tk.Frame(self.root, bg="#f0f0f0")
-        main_container.pack(fill="both", expand=True, padx=20, pady=20)
+        # MAIN CONTAINER with scrollable canvas
+        canvas = tk.Canvas(self.root, bg="#f0f0f0")
+        scrollbar = tk.Scrollbar(self.root, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg="#f0f0f0")
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True, padx=20, pady=20)
+        scrollbar.pack(side="right", fill="y")
 
         # TITLE
         title_label = tk.Label(
-            main_container,
+            scrollable_frame,
             text="Account Settings",
             font=("Arial", 20, "bold"),
             bg="#f0f0f0",
@@ -78,7 +89,7 @@ class AccountModScreen:
 
         # CURRENT USER
         user_label = tk.Label(
-            main_container,
+            scrollable_frame,
             text=f"Current User: {self.user_data.get('name', '')} {self.user_data.get('surname', '')}",
             font=("Arial", 14),
             bg="#f0f0f0",
@@ -87,12 +98,12 @@ class AccountModScreen:
         user_label.pack(pady=(0, 20))
 
         # FORM CONTAINER
-        form_container = tk.Frame(main_container, bg="#ffffff", relief="solid", bd=2)
-        form_container.pack(fill="both", expand=True)
+        form_container = tk.Frame(scrollable_frame, bg="#ffffff", relief="solid", bd=2)
+        form_container.pack(fill="x", pady=20)
 
         # ALL FORM FIELDS
         fields_container = tk.Frame(form_container, bg="#ffffff")
-        fields_container.pack(fill="both", expand=True, padx=30, pady=30)
+        fields_container.pack(fill="x", padx=30, pady=30)
 
         # NAME FIELD
         tk.Label(fields_container, text="Name:", font=("Arial", 12, "bold"), bg="#ffffff").pack(anchor="w")
@@ -141,8 +152,18 @@ class AccountModScreen:
         )
         submit_btn.pack(pady=10)
 
-        
-        
+        # MAIN SCREEN BUTTON
+        main_screen_btn = tk.Button(
+            buttons_container,
+            text="BACK TO MAIN SCREEN",
+            font=("Arial", 14, "bold"),
+            bg="#3498db",
+            fg="white",
+            width=25,
+            height=2,
+            command=self.back_to_main
+        )
+        main_screen_btn.pack(pady=10)
 
         # POPULATE FIELDS WITH CURRENT DATA
         self._populate_fields()
