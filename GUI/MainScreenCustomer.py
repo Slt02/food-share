@@ -3,6 +3,8 @@ from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  
 from GUI.DropOffRegistrationScreen import DropOffRegistrationScreen
 from order_controller import OrderController
+from GUI.MenuScreen import MenuScreen
+from Database import Database
 
 class CustomerMainScreen:
     def __init__(self, root=None, customer_id=None):
@@ -12,7 +14,10 @@ class CustomerMainScreen:
         
         # Store user data and get the real user ID
         self.customer_id = customer_id
-        self.user = customer_id
+        self.user_id = customer_id  # Fixed: use customer_id as user_id
+        
+        # Initialize database connection
+        self.init_database()
         
         # Display welcome message with user name
         welcome_text = "Welcome - Customer Main Screen"
@@ -39,8 +44,30 @@ class CustomerMainScreen:
             height=2
         ).pack(side="bottom", pady=20)
 
+    def init_database(self):
+        """Initialize database connection using Database class"""
+        try:
+            self.db = Database()
+        except Exception as e:
+            self.db = None
+
     def menu(self):
-        messagebox.showinfo("Menu", "Menu button clicked. (Not implemented)")
+        """Open MenuScreen to display available food items"""        
+        if not self.db:
+            messagebox.showerror("Database Error", "No database connection available")
+            return
+        
+        try:
+            # Hide the main screen
+            self.root.withdraw()
+            
+            # Create and display MenuScreen
+            menu_screen = MenuScreen(self.root, self.customer_id, self.db)
+            menu_screen.display()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open menu screen:\n{str(e)}")
+            self.root.deiconify()  # Show main screen again
 
     # Fetch and display the order history for the customer when the button is clicked
     def order_history(self):
@@ -57,7 +84,7 @@ class CustomerMainScreen:
         self.root.withdraw()
         # Open the AccountModScreen passing in the parent window and role ("customer").
         account_screen = AccountModScreen(self.root, "customer")
-        # Use the real user_id from the logged-in user instead of hardcoded 7
+        # Use the real user_id from the logged-in user
         account_screen.displayAccountModScreen(user_id=self.user_id)
 
     def display(self):
