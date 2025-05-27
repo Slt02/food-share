@@ -539,3 +539,49 @@ class Database:
         except mysql.connector.Error as err:
             print(f"Database error in get_all_donations: {err}")
             return []
+    
+    def list_available_requests(self):
+        """Return rows (id, customer_id, delivery_address, number_of_people) where request is pending."""
+        return self.execute_query(
+            "SELECT id, customer_id, delivery_address, number_of_people "
+            "FROM food_requests WHERE status = 'pending' ORDER BY created_at")
+
+
+    def assign_request_to_agent(self, request_id: int, agent_id: int):
+        """Atomically create a delivery and mark request as in_transit."""
+        try:
+            # create delivery row
+            self.cursor.execute(
+                "INSERT INTO deliveries (request_id, agent_id) VALUES (%s, %s)",
+                (request_id, agent_id))
+            # update request status
+            self.cursor.execute(
+                "UPDATE food_requests SET status = 'in_transit' WHERE id = %s",
+                (request_id,))
+            self.connection.commit()
+            return True
+        except Exception as err:
+            print(f"DB‑error assign_request_to_agent: {err}")
+            self.connection.rollback()
+            return False
+    def get_agent_deliveries(self, agent_id: int):
+        """
+        Επιστρέφει όλες τις παραδόσεις που έχουν ανατεθεί
+        στον συγκεκριμένο drop-off agent.
+        """
+        sql = """
+            SELECT id, request_id, status, eta
+            FROM deliveries
+            WHERE agent_id = %s
+            ORDER BY status = 'completed', eta IS NULL, eta
+        """
+        return self.execute_query(sql, (agent_id,)) or []
+
+    def update_delivery_status(self, delivery_id: int, new_status: str, eta=None):
+        """
+        Ενημερώνει την κατάσταση (status) και προαιρετικά το ETA μίας παράδοσης.
+        """
+        sql = "UPDATE deliveries SET status=%s, eta=%s WHERE id=%s"
+        self.cursor.execute(sql, (new_status, eta, delivery_id))
+        self.connection.commit()
+        return self.cursor.rowcount == 1
