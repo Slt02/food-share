@@ -40,7 +40,7 @@ class MainScreenDonor:
             height=2
         ).pack(pady=10)
 
-        # "Track Donation Usage" button
+        # "Track Donation Usage" button - Updated to show PersonalDonationsScreen
         tk.Button(
             self.root,
             text="Track Donation Usage",
@@ -103,6 +103,19 @@ class MainScreenDonor:
                 print("Could not import AccountModScreen")
                 return None
 
+    def _initialize_personal_donations_screen(self):
+        """Initialize PersonalDonationsScreen when needed"""
+        try:
+            from PersonalDonationsScreen import PersonalDonationsScreen
+            return PersonalDonationsScreen
+        except ImportError:
+            try:
+                from GUI.PersonalDonationsScreen import PersonalDonationsScreen
+                return PersonalDonationsScreen
+            except ImportError:
+                print("Could not import PersonalDonationsScreen")
+                return None
+
     def report(self):
         messagebox.showinfo("Report", "Report button pressed. (Not implemented)")
 
@@ -154,7 +167,41 @@ class MainScreenDonor:
             self.root.deiconify()  # Show main screen again if error
 
     def track_donation_usage(self):
-        messagebox.showinfo("Track Donation Usage", "Track Donation Usage button pressed. (Not implemented)")
+        """Track personal donations - Show PersonalDonationsScreen"""
+        print("Track Donation Usage button clicked...")
+        
+        # Check if user is logged in
+        if not self.user_id:
+            messagebox.showwarning("Login Required", 
+                                 "Please log in to view your donation history.")
+            return
+        
+        # Initialize PersonalDonationsScreen
+        PersonalDonationsScreenClass = self._initialize_personal_donations_screen()
+        if not PersonalDonationsScreenClass:
+            messagebox.showwarning("Missing Module", 
+                                 "PersonalDonationsScreen not found.\n\n"
+                                 "Please make sure you have:\n"
+                                 "• PersonalDonationsScreen.py\n"
+                                 "• PersonalDonationsController.py\n"
+                                 "• Database.py")
+            return
+        
+        try:
+            print(f"Opening Personal Donations Screen for donor ID: {self.user_id}")
+            self.root.withdraw()  # Hide the donor main screen
+            
+            # Create and display PersonalDonationsScreen with logged-in donor's ID
+            donations_screen = PersonalDonationsScreenClass(self.root, self.user_id)
+            donations_screen.show()
+            
+            # Show main screen when donations screen closes
+            self.root.deiconify()
+            
+        except Exception as e:
+            print(f"Error opening donations screen: {e}")
+            messagebox.showerror("Error", f"Could not load your donation history:\n{str(e)}")
+            self.root.deiconify()  # Show main screen again if error
 
     def manage_account(self):
         print("Manage Account button clicked...")
