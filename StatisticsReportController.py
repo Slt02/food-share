@@ -1,91 +1,94 @@
 # StatisticsReportController.py
+from __future__ import annotations
 from datetime import datetime
+from typing import Dict, Any
 from Database import Database
 from Report import Report
 
 
 class StatisticsReportController:
-    """Συγκεντρώνει στατιστικά από τη βάση και χτίζει αναφορά."""
+    """Δημιουργεί στατιστικές και (προαιρετικά) τις αποθηκεύει."""
 
-    def __init__(self):
-        self.db = Database()
+    def __init__(self, db: Database | None = None) -> None:
+        self.db: Database = db or Database()
 
-    # ----------  ΣΥΛΛΟΓΗ ΣΤΑΤΙΣΤΙΚΩΝ  ----------
-    def _query_scalar(self, sql, params=None, fallback=0):
-        """Εκτελεί query που επιστρέφει single-value (π.χ. COUNT)."""
-        res = self.db.execute_query(sql, params)
-        return res[0][0] if res else fallback
+    
+    def _single_value(self, sql: str, params: tuple = ()) -> int:
+        rows = self.db.execute_query(sql, params or ())  # returns list[tuple]
+        return int(rows[0][0]) if rows else 0
 
-    def fetch_statistics(self):
-        """Επιστρέφει dict με όλα τα απαιτούμενα νούμερα."""
-        stats = {
-            # Χρήστες
-            "total_users": self._query_scalar("SELECT COUNT(*) FROM users"),
-            "users_per_role": {
-                role: cnt
-                for role, cnt in (
-                    self.db.execute_query(
-                        "SELECT role, COUNT(*) FROM users GROUP BY role"
-                    )
-                    or []
-                )
-            },
-            # Δωρεές
-            "total_donations": self._query_scalar("SELECT COUNT(*) FROM donations"),
-            "total_items_donated": self._query_scalar(
-                "SELECT IFNULL(SUM(quantity),0) FROM donations"
-            ),
-            # Αιτήματα τροφίμων
-            "total_requests": self._query_scalar("SELECT COUNT(*) FROM food_requests"),
-            "requests_by_status": {
-                status: cnt
-                for status, cnt in (
-                    self.db.execute_query(
-                        "SELECT status, COUNT(*) FROM food_requests GROUP BY status"
-                    )
-                    or []
-                )
-            },
+    def _count(self, table: str, where: str | None = None) -> int:
+        q = f"SELECT COUNT(*) FROM {table}"
+        if where:
+            q += " WHERE " + where
+        return self._single_value(q)
+
+    def collect_kpis(self) -> Dict[str, Any]:
+        return {
+            "users_total":        self._count("users"),
+            "customers":          self._count("users", "role='customer'"),
+            "donors":             self._count("users", "role='donor'"),
+            "dropoff_agents":     self._count("users", "role='drop_off_agent'"),
+            "pending_requests":   self._count("food_requests", "status='pending'"),
+            "in_transit_requests":self._count("food_requests", "status='in_transit'"),
+            "completed_requests": self._count("food_requests", "status='completed'"),
+            "donations":          self._count("donations"),
         }
-        return stats
 
-    # ----------  ΔΗΜΙΟΥΡΓΙΑ ΑΝΑΦΟΡΑΣ  ----------
-    def build_report(self, admin_id):
-        """Επιστρέφει αντικείμενο Report ή None αν δεν υπάρχουν δεδομένα."""
-        stats = self.fetch_statistics()
+    def build_report(self, admin_id: int) -> Report | None:
+        """Επιστρέφει έτοιμο Report ή None αν δεν υπάρχουν δεδομένα."""
+        stats = self.collect_kpis()
+        if not stats:
+            return None
 
-        nothing_to_show = (
-            stats["total_users"] == 0
-            and stats["total_donations"] == 0
-            and stats["total_requests"] == 0
-        )
-        if nothing_to_show:
-            return None  # Ενεργοποιεί την εναλλακτική ροή 2.1
-
+        now = datetime.now()
         lines = [
-            f"=== Statistics Report ({datetime.now():%Y-%m-%d %H:%M}) ===\n",
-            f"Total registered users: {stats['total_users']}",
+            "FoodShare – Daily Statistics Report",
+            f"Generated: {now:%Y-%m-%d %H:%M:%S}",
+            f"Admin ID : {admin_id}",
+            "",
+            "=== Users ===",
+            f"Total           : {stats['users_total']}",
+            f"  • Customers   : {stats['customers']}",
+            f"  • Donors      : {stats['donors']}",
+            f"  • Drop-off Ag.: {stats['dropoff_agents']}",
+            "",
+            "=== Food Requests ===",
+            f"Pending         : {stats['pending_requests']}",
+            f"In transit      : {stats['in_transit_requests']}",
+            f"Completed       : {stats['completed_requests']}",
+            "",
+            "=== Donations ===",
+            f"Total donations : {stats['donations']}",
+            "",
+            "End of report.",
         ]
-        if stats["users_per_role"]:
-            lines.append("Users per role:")
-            for role, cnt in stats["users_per_role"].items():
-                lines.append(f"   • {role}: {cnt}")
 
-        lines.extend(
-            [
-                "",
-                f"Total donations made: {stats['total_donations']}",
-                f"Total individual items donated: {stats['total_items_donated']}",
-                "",
-                f"Total food requests: {stats['total_requests']}",
-            ]
+        rpt = Report(
+            description="Daily statistics report",
+            created_at=now,
+            author=admin_id,
+            date_created=now,
         )
-        if stats["requests_by_status"]:
-            lines.append("Requests by status:")
-            for status, cnt in stats["requests_by_status"].items():
-                lines.append(f"   • {status}: {cnt}")
-
-        # Δημιουργία αντικειμένου Report
-        rpt = Report(author=admin_id, date_created=datetime.now())
         rpt.content = "\n".join(lines)
         return rpt
+
+    def save_report(self, report: Report) -> bool:
+        sql = (
+            "INSERT INTO reports (author_id, description, content, created_at) "
+            "VALUES (%s, %s, %s, %s)"
+        )
+        params = (report.author, report.description, report.content, report.date_created)
+        try:
+            self.db.execute_query(sql, params)
+            self.db.connection.commit()
+            return True
+        except Exception as err:
+            print("[StatisticsReportController] save_report failed:", err)
+            return False
+
+
+if __name__ == "__main__":
+    ctr = StatisticsReportController()
+    rpt = ctr.build_report(admin_id=1)
+    print(rpt.content if rpt else "No data available.")
