@@ -61,9 +61,12 @@ class CustomerMainScreen:
             # Hide the main screen
             self.root.withdraw()
             
-            # Create and display MenuScreen
-            menu_screen = MenuScreen(self.root, self.customer_id, self.db)
-            menu_screen.display()
+            # Create and display MenuScreen - Fixed: only pass parent parameter
+            menu_screen = MenuScreen(self.root)
+            menu_screen.show()
+            
+            # Show main screen when menu window is closed
+            self.root.deiconify()
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open menu screen:\n{str(e)}")
