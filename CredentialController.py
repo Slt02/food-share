@@ -204,10 +204,6 @@ class CredentialController:
             return False
     
     
-        
-        user_permissions = permissions.get(user_role, [])
-        return required_permission in user_permissions
-    
     def validate_email(self, email):
         """Checks if the email format is valid."""
         if not email or not email.strip():
