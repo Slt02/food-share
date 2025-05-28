@@ -203,27 +203,7 @@ class CredentialController:
             print(f"Error opening screen for role {role}: {e}")
             return False
     
-    def get_user_dashboard_route(self, user_role):
-        
-        dashboard_routes = {
-            'admin': 'admin_dashboard',
-            'customer': 'customer_main_screen',
-            'donor': 'donor_dashboard',
-            'dropoffagent': 'agent_dashboard'
-        }
-        
-        return dashboard_routes.get(user_role, 'customer_main_screen')  # Default to customer
     
-    def check_user_permissions(self, user_role, required_permission):
-        """
-        Checks if user has permission to access certain features.
-        """
-        permissions = {
-            'admin': ['manage_users', 'view_all_orders', 'manage_inventory', 'view_reports'],
-            'customer': ['place_order', 'view_own_orders', 'update_profile'],
-            'donor': ['donate_food', 'view_own_donations', 'update_profile'],
-            'dropoffagent': ['manage_deliveries', 'view_assigned_orders', 'update_profile']
-        }
         
         user_permissions = permissions.get(user_role, [])
         return required_permission in user_permissions
