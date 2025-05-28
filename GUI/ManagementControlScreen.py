@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
-from ..ModificationValidator import ModificationValidator
+from ModificationValidator import ModificationValidator
 import threading
 
 

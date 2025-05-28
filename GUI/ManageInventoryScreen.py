@@ -13,6 +13,14 @@ class ManageInventoryScreen:
 
         self.status_var = tk.StringVar()
 
+        tk.Button(
+        self.root,
+        text="modify",
+        width=20,
+        height=2,
+        command=self.ΜanagementControl_Screen,
+        ).pack(side="bottom", anchor="se", padx=10, pady=10)
+
         
     
 
@@ -328,7 +336,19 @@ class ManageInventoryScreen:
                 self.controller.close()
             self.root.destroy()
     
+    def ΜanagementControl_Screen(self):
+        from ManagementControlScreen import ManagementControlScreen
+        
+        # Hide the admin main screen
+        self.root.withdraw()
+        
+        # Create a new window for inventory management
+        inventory_window = tk.Toplevel(self.root)
+        inventory_app = ManagementControlScreen(inventory_window)
+
     
+     
+
 
 
 def main():
