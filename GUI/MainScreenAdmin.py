@@ -79,8 +79,15 @@ class MainScreenAdmin:
         ).pack(pady=10)
 
     def manage_inventory(self):
-        messagebox.showinfo("Manage Inventory", "Manage Inventory button clicked. (Not implemented)")
-
+        from GUI.ManageInventoryScreen import ManageInventoryScreen
+        
+        # Hide the admin main screen
+        self.root.withdraw()
+        
+        # Create a new window for inventory management
+        inventory_window = tk.Toplevel(self.root)
+        inventory_app = ManageInventoryScreen(inventory_window)
+        
     def monitor_requests(self):
         messagebox.showinfo("Monitor Requests", "Monitor Requests button clicked. (Not implemented)")
 
@@ -117,3 +124,5 @@ class MainScreenAdmin:
         # Open the DropOffRegistrationScreen
         drop_off_screen = DropOffRegistrationScreen(self.root)
         drop_off_screen.show_registration_form()
+
+    
