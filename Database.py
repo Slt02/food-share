@@ -324,38 +324,7 @@ class Database:
             self.connection.rollback()
             return None
 
-    # Create a new user in the database - UPDATED to return user_id
-    def create_user(self, user_data):
-        """
-        Creates a basic user in the database (for admin, dropoffagent, etc.).
-        Returns the user_id if successful, None if failed.
-        """
-        try:
-            query = """
-                INSERT INTO users (username, name, surname, email, password, phone, role) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """
-            params = (
-                user_data['username'],
-                user_data['name'],
-                user_data['surname'],
-                user_data['email'],
-                user_data['password'],
-                user_data['phone'],
-                user_data['role']
-            )
-            
-            self.cursor.execute(query, params)
-            user_id = self.cursor.lastrowid
-            self.connection.commit()
-            
-            print(f"User {user_data['email']} created successfully with ID: {user_id}")
-            return user_id
-            
-        except mysql.connector.Error as err:
-            print(f"Database error in create_user: {err}")
-            self.connection.rollback()
-            return None
+    
 
     def email_exists(self, email):
         """

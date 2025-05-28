@@ -40,11 +40,11 @@ class MainScreenDonor:
             height=2
         ).pack(pady=10)
 
-        # "Track Donation Usage" button - Updated to show PersonalDonationsScreen
+        # "Track Donation" button - Updated text from "Track Donation Usage"
         tk.Button(
             self.root,
-            text="Track Donation Usage",
-            command=self.track_donation_usage,
+            text="Track Donation",
+            command=self.track_donation,
             width=20,
             height=2
         ).pack(pady=10)
@@ -166,9 +166,9 @@ class MainScreenDonor:
             messagebox.showerror("Error", f"Failed to open registration form:\n{str(e)}")
             self.root.deiconify()  # Show main screen again if error
 
-    def track_donation_usage(self):
+    def track_donation(self):
         """Track personal donations - Show PersonalDonationsScreen"""
-        print("Track Donation Usage button clicked...")
+        print("Track Donation button clicked...")
         
         # Check if user is logged in
         if not self.user_id:
