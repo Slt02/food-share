@@ -18,7 +18,7 @@ class MenuScreen:
         """Display the menu screen"""
         self.window = tk.Toplevel(self.parent) if self.parent else tk.Tk()
         self.window.title("Food Share - Menu")
-        self.window.geometry("800x600")
+        self.window.geometry("800x700")
         self.window.configure(bg="#9AFF9A")
         
         # Title
