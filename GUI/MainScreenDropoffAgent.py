@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from GUI.AccountModScreen import AccountModScreen  
 from GUI.UpdateDeliveryStatusScreen import UpdateDeliveryStatusScreen
+from GUI.AvailableRequestsScreen import AvailableRequestsScreen
 
 class MainScreenDropoffAgent:
     def __init__(self, user_data=None):
