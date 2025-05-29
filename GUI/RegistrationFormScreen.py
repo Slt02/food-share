@@ -51,18 +51,6 @@ class RegistrationFormScreen:
         ttk.Label(main_frame, text="Register Donation", 
                  font=('Arial', 18, 'bold')).pack(pady=(0, 10))
         
-        if self.donor_id:
-            ttk.Label(main_frame, text=f"Logged in as: {self.donor_id}", 
-                     font=('Arial', 10), foreground='blue').pack(pady=(0, 15))
-        
-        # Show database status
-        if self.db:
-            ttk.Label(main_frame, text="Connected to foodshare database", 
-                     font=('Arial', 9), foreground='green').pack(pady=(0, 15))
-        else:
-            ttk.Label(main_frame, text="Database connection failed", 
-                     font=('Arial', 9), foreground='red').pack(pady=(0, 15))
-        
         ttk.Label(main_frame, text="Item Name:", 
                  font=('Arial', 12, 'bold')).pack(anchor=tk.W, pady=(10, 5))
         item_entry = ttk.Entry(main_frame, textvariable=self.item_name_var, 
@@ -172,44 +160,31 @@ class RegistrationFormScreen:
         }
         
         try:
-            # Check details
-            check_result = self.check_details(donation_data)
-            if not check_result['valid']:
-                error_msg = "\n".join([f"• {error}" for error in check_result['errors']])
-                messagebox.showwarning("Validation Error", error_msg)
-                self.status_label.config(text="Please fix errors", foreground='red')
-                return
-            
-            # Validate donation
+            # Validate donation (this includes checking details)
             validation_result = self.validate_donation(donation_data)
             if not validation_result['valid']:
                 error_msg = "\n".join([f"• {error}" for error in validation_result['errors']])
-                messagebox.showwarning("Validation Failed", error_msg)
-                self.status_label.config(text="Validation failed", foreground='red')
+                messagebox.showwarning("Validation Error", error_msg)
+                self.status_label.config(text="Please fix errors", foreground='red')
                 return
             
             # Create donation using Database class
             result = self.creating_donation(donation_data)
             
             if result['success']:
-                donation = result['donation']
+                # Simple success message without ID
                 success_msg = (f"🎉 SUCCESS! 🎉\n\n"
-                              f"Donation registered successfully!\n\n"
-                              f"ID: {donation['id']}\n"
-                              f"Donor: {donation['donor_id']}\n"
-                              f"Item: {donation['item_name']}\n"
-                              f"Quantity: {donation['quantity']}\n"
-                              f"Date: {donation['donation_date']}")
+                              f"Donation registered successfully!")
                 
                 messagebox.showinfo("Success", success_msg)
                 self.status_label.config(text="Donation registered successfully!", foreground='green')
                 self.clear_form()
             else:
-                messagebox.showerror("Error", f"Registration failed:\n{result['message']}")
+                messagebox.showwarning("Error", f"Registration failed:\n{result['message']}")
                 self.status_label.config(text="Registration failed", foreground='red')
         
         except Exception as e:
-            messagebox.showerror("Error", f"Unexpected error:\n{str(e)}")
+            messagebox.showwarning("Error", f"Unexpected error:\n{str(e)}")
             self.status_label.config(text="Error occurred", foreground='red')
     
     def clear_form(self):

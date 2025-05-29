@@ -114,3 +114,8 @@ class MenuController:
         else:
             print("\nNo items currently available.")
             return []
+        
+    def close(self):
+        """Close database connection"""
+        if hasattr(self.db, 'close'):
+            self.db.close()   

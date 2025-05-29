@@ -92,7 +92,6 @@ class DonationController:
                 'message': "Failed to create donation"
             }
     
-    # Helper methods for screens
     def display(self) -> Dict[str, Any]:
         """Get all donations for display using Database class"""
         donations = self.db.get_all_donations()
@@ -101,9 +100,7 @@ class DonationController:
             'donations': donations
         }
     
-    def show_warning(self, warnings: List[str]) -> Dict[str, Any]:
-        """Format warnings for display"""
-        return {
-            'has_warnings': len(warnings) > 0,
-            'warnings': warnings
-        }
+    def close(self):
+        """Close database connection"""
+        if hasattr(self.db, 'close'):
+            self.db.close()
