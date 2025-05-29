@@ -38,17 +38,7 @@ class MainScreenDonor:
             fg="#2F4F4F"
         ).pack(pady=(0, 20))
 
-        # "Report" button
-        tk.Button(
-            self.root,
-            text="Report",
-            command=self.report,
-            width=20,
-            height=2,
-            bg="#32CD32",
-            fg="white",
-            font=("Helvetica", 10, "bold")
-        ).pack(pady=10)
+        
 
         # "Register Donation" button
         tk.Button(
@@ -142,8 +132,7 @@ class MainScreenDonor:
                 print("Could not import PersonalDonationsScreen")
                 return None
 
-    def report(self):
-        messagebox.showinfo("Report", "Report button pressed. (Not implemented)")
+    
 
     def register_donation(self):
         """Open the registration form screen"""
