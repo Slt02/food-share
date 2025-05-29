@@ -181,7 +181,7 @@ class PendingOrdersController:
             print(f"Error filtering pending orders: {e}")
             return []
     
-    def _process_orders_data(self, orders_data):
+    def process_orders_data(self, orders_data):
         """Helper method to process raw order data into FoodRequest objects"""
         if not orders_data:
             return []
@@ -228,7 +228,7 @@ class PendingOrdersController:
         
         return processed_orders
     
-    def close_connection(self):
+    def close(self):
         """Close the database connection"""
         if self.db:
             self.db.close()
