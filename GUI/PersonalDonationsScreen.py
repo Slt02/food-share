@@ -20,30 +20,53 @@ class PersonalDonationsScreen:
         self.window = tk.Toplevel(self.parent) if self.parent else tk.Tk()
         self.window.title("My Donations")
         self.window.geometry("600x500")
+        self.window.configure(bg='#66BB6A')  # Light green background like login
+        
+        # Main container
+        main_container = tk.Frame(self.window, bg='#66BB6A')
+        main_container.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+        
+        # White content area
+        content_frame = tk.Frame(main_container, bg='white', relief='raised', bd=2)
+        content_frame.pack(fill=tk.BOTH, expand=True)
         
         # Title
-        title = tk.Label(self.window, text="My Donations", font=("Arial", 18, "bold"))
-        title.pack(pady=10)
+        title_frame = tk.Frame(content_frame, bg='white')
+        title_frame.pack(fill=tk.X, pady=(20, 10))
+        
+        title = tk.Label(title_frame, text="My Donations", 
+                        font=("Arial", 18, "bold"), bg='white', fg='#2E7D32')
+        title.pack()
         
         # Create scrollable list
-        self.create_donations_list()
+        self.create_donations_list(content_frame)
         
-        # Refresh button
-        refresh_btn = tk.Button(self.window, text="Refresh", command=self.load_donations)
-        refresh_btn.pack(pady=10)
+        # Button frame
+        button_frame = tk.Frame(content_frame, bg='white')
+        button_frame.pack(pady=20)
+        
+        # Refresh button (green like login)
+        refresh_btn = tk.Button(button_frame, text="Refresh", command=self.load_donations,
+                               bg='#4CAF50', fg='white', font=('Arial', 12, 'bold'),
+                               padx=20, pady=8, relief='flat', cursor='hand2')
+        refresh_btn.pack()
         
         self.load_donations()
         
         if not self.parent:
             self.window.mainloop()
     
-    def create_donations_list(self):
+    def create_donations_list(self, parent_frame):
         """Create scrollable donations list"""
         # Frame for the treeview and scrollbar
-        list_frame = tk.Frame(self.window)
+        list_frame = tk.Frame(parent_frame, bg='white')
         list_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
         # Create treeview with scrollbar
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=('Arial', 12, 'bold'), foreground='#2E7D32')
+        style.configure("Treeview", font=('Arial', 11))
+        
         self.tree = ttk.Treeview(list_frame, columns=("Item", "Quantity", "Date"), show="headings")
         scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
@@ -51,11 +74,11 @@ class PersonalDonationsScreen:
         # Configure columns
         self.tree.heading("Item", text="Item Name")
         self.tree.heading("Quantity", text="Quantity")
-        self.tree.heading("Date", text="Date")
+        self.tree.heading("Date", text="Date & Time")
         
         self.tree.column("Item", width=200)
         self.tree.column("Quantity", width=100)
-        self.tree.column("Date", width=150)
+        self.tree.column("Date", width=200)
         
         # Pack treeview and scrollbar
         self.tree.pack(side="left", fill="both", expand=True)
@@ -96,14 +119,32 @@ class PersonalDonationsScreen:
             messagebox.showerror("Error", "Could not get donation details")
             return
         
-        # Simple details popup
+        # Green-themed details popup
         popup = tk.Toplevel(self.window)
         popup.title("Donation Details")
-        popup.geometry("300x200")
+        popup.geometry("350x250")
+        popup.configure(bg='#66BB6A')
         
-        tk.Label(popup, text=f"Item: {details['item_name']}", font=("Arial", 12)).pack(pady=5)
-        tk.Label(popup, text=f"Quantity: {details['quantity']}").pack(pady=5)
-        tk.Label(popup, text=f"Date: {details['donation_date']}").pack(pady=5)
-        tk.Label(popup, text=f"ID: {details['donation_id']}").pack(pady=5)
+        # White content frame
+        content = tk.Frame(popup, bg='white', relief='raised', bd=2)
+        content.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        tk.Button(popup, text="Close", command=popup.destroy).pack(pady=10)
+        # Title
+        tk.Label(content, text="Donation Details", 
+                font=("Arial", 16, "bold"), bg='white', fg='#2E7D32').pack(pady=(15, 20))
+        
+        # Details
+        tk.Label(content, text=f"Item: {details['item_name']}", 
+                font=("Arial", 12), bg='white', fg='#333333').pack(pady=5)
+        tk.Label(content, text=f"Quantity: {details['quantity']}", 
+                font=("Arial", 12), bg='white', fg='#333333').pack(pady=5)
+        tk.Label(content, text=f"Date & Time: {details['donation_date']}", 
+                font=("Arial", 12), bg='white', fg='#333333').pack(pady=5)
+        tk.Label(content, text=f"ID: {details['donation_id']}", 
+                font=("Arial", 12), bg='white', fg='#333333').pack(pady=5)
+        
+        # Close button
+        close_btn = tk.Button(content, text="Close", command=popup.destroy,
+                             bg='#4CAF50', fg='white', font=('Arial', 12, 'bold'),
+                             padx=20, pady=8, relief='flat', cursor='hand2')
+        close_btn.pack(pady=15)

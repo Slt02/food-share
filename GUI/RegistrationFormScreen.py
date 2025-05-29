@@ -17,6 +17,7 @@ class RegistrationFormScreen:
             
         self.root.title("Food Share - Donation Registration")
         self.root.geometry("500x550")
+        self.root.configure(bg='#66BB6A')  # Light green background like login500x550")
         self.root.configure(bg='#f0f0f0')
         
         # Handle window closing properly
@@ -45,38 +46,66 @@ class RegistrationFormScreen:
             self.db = None
     
     def setup_ui(self):
-        main_frame = ttk.Frame(self.root, padding="40")
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        # Main container with light green background (like login form)
+        main_container = tk.Frame(self.root, bg='#66BB6A')
+        main_container.pack(fill=tk.BOTH, expand=True, padx=40, pady=40)
         
-        ttk.Label(main_frame, text="Register Donation", 
-                 font=('Arial', 18, 'bold')).pack(pady=(0, 10))
+        # White form area (like login form)
+        form_frame = tk.Frame(main_container, bg='white', relief='raised', bd=2)
+        form_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        ttk.Label(main_frame, text="Item Name:", 
-                 font=('Arial', 12, 'bold')).pack(anchor=tk.W, pady=(10, 5))
-        item_entry = ttk.Entry(main_frame, textvariable=self.item_name_var, 
-                              font=('Arial', 12), width=35)
+        # Content inside white form
+        content_frame = tk.Frame(form_frame, bg='white')
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+        
+        # Title
+        title_label = tk.Label(content_frame, text="Register Donation", 
+                              font=('Arial', 18, 'bold'), bg='white', fg='#2E7D32')
+        title_label.pack(pady=(0, 20))
+        
+        # Item Name
+        tk.Label(content_frame, text="Item Name:", 
+                font=('Arial', 12, 'bold'), bg='white', fg='#2E7D32').pack(anchor=tk.W, pady=(10, 5))
+        item_entry = tk.Entry(content_frame, textvariable=self.item_name_var, 
+                             font=('Arial', 12), width=35, relief='solid', bd=1)
         item_entry.pack(fill=tk.X, pady=(0, 20))
         item_entry.focus()
         
-        ttk.Label(main_frame, text="Quantity:", 
-                 font=('Arial', 12, 'bold')).pack(anchor=tk.W, pady=(10, 5))
-        quantity_entry = ttk.Entry(main_frame, textvariable=self.quantity_var, 
-                                  font=('Arial', 12), width=35)
+        # Quantity
+        tk.Label(content_frame, text="Quantity:", 
+                font=('Arial', 12, 'bold'), bg='white', fg='#2E7D32').pack(anchor=tk.W, pady=(10, 5))
+        quantity_entry = tk.Entry(content_frame, textvariable=self.quantity_var, 
+                                 font=('Arial', 12), width=35, relief='solid', bd=1)
         quantity_entry.pack(fill=tk.X, pady=(0, 30))
         
-        button_frame = ttk.Frame(main_frame)
+        # Buttons
+        button_frame = tk.Frame(content_frame, bg='white')
         button_frame.pack(pady=20)
         
-        ttk.Button(button_frame, text="Register Donation", 
-                  command=self.submit_donation).pack(side=tk.LEFT, padx=(0, 15))
+        # Register button (green like login)
+        register_btn = tk.Button(button_frame, text="Register Donation", 
+                               command=self.submit_donation, 
+                               bg='#4CAF50', fg='white', font=('Arial', 12, 'bold'),
+                               padx=20, pady=8, relief='flat', cursor='hand2')
+        register_btn.pack(side=tk.LEFT, padx=(0, 15))
         
-        ttk.Button(button_frame, text="Clear Form", 
-                  command=self.clear_form).pack(side=tk.LEFT, padx=(0, 15))
+        # Clear button
+        clear_btn = tk.Button(button_frame, text="Clear Form", 
+                            command=self.clear_form,
+                            bg='#757575', fg='white', font=('Arial', 12),
+                            padx=20, pady=8, relief='flat', cursor='hand2')
+        clear_btn.pack(side=tk.LEFT, padx=(0, 15))
         
-        ttk.Button(button_frame, text="Back to Main", 
-                  command=self.on_close).pack(side=tk.LEFT)
+        # Back button
+        back_btn = tk.Button(button_frame, text="Back to Main", 
+                           command=self.on_close,
+                           bg='#757575', fg='white', font=('Arial', 12),
+                           padx=20, pady=8, relief='flat', cursor='hand2')
+        back_btn.pack(side=tk.LEFT)
         
-        self.status_label = ttk.Label(main_frame, text="Ready to register donation")
+        # Status label
+        self.status_label = tk.Label(content_frame, text="Ready to register donation",
+                                   bg='white', fg='#666666', font=('Arial', 10))
         self.status_label.pack(pady=(20, 0))
         
         self.root.bind('<Return>', lambda e: self.submit_donation())
@@ -106,8 +135,9 @@ class RegistrationFormScreen:
     def creating_donation(self, donation_data):
         """Create donation using Database class"""
         try:
+            # Set current date and time (not just date)
             if 'donation_date' not in donation_data:
-                donation_data['donation_date'] = datetime.now().strftime('%Y-%m-%d')
+                donation_data['donation_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Use Database class method to create donation
             donation_id = self.db.create_donation(
