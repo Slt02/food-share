@@ -12,7 +12,7 @@ class ModificationValidator:
         self.db = Database()
         
         # Define valid categories based on your database
-        self.valid_categories = ['Chips', 'fumar', 'vegetables', 'fruits', 'dairy', 'meat', 'beverages', 'sweet',]
+        self.valid_categories = ['vegetables', 'fruits', 'dairy', 'meat', 'beverages', 'sweet', 'pizzas']
         
         # Validation rules
         self.MIN_ITEM_NAME_LENGTH = 2
