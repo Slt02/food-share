@@ -433,6 +433,7 @@ if __name__ == "__main__":
             print(f"  Average Quantity: {stats['average_quantity']:.2f}")
             print(f"  Min/Max: {stats['min_quantity']}/{stats['max_quantity']}")
             print(f"  Health: {stats['inventory_health']}")
+
     
     # Get all categories summary
     print("\nAll Categories Summary:")
