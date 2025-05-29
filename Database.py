@@ -148,7 +148,7 @@ class Database:
         # Get the order details from the database
         order_history = []
         for order in order_data:
-            request_id, customer_id, delivery_address, number_of_people, status, created_at = order
+            request_id, customer_id, delivery_address, number_of_people, status, delivery_status, created_at = order
 
             # Get the items for each order
             items_query = "SELECT item_name, quantity FROM food_request_items WHERE request_id = %s"
