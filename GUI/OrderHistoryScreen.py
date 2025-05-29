@@ -16,13 +16,13 @@ class OrderHistoryScreen:
             widget.destroy()
 
         # Wrapper frame to contain canvas and scrollbar
-        wrapper = tk.Frame(self.root)
+        wrapper = tk.Frame(self.root, bg="#9AFF9A")
         wrapper.pack(fill="both", expand=True)
 
         # Create a canvas and scrollbar
-        canvas = tk.Canvas(wrapper)
+        canvas = tk.Canvas(wrapper, bg="#9AFF9A")
         scrollbar = tk.Scrollbar(wrapper, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas)
+        scrollable_frame = tk.Frame(canvas, bg="#9AFF9A")
 
         scrollable_frame.bind(
         "<Configure>",
@@ -38,13 +38,13 @@ class OrderHistoryScreen:
         scrollbar.pack(side="right", fill="y")
 
         # Title
-        title = tk.Label(scrollable_frame, text="🕘 Order History", fg="#333")
+        title = tk.Label(scrollable_frame, text="🕘 Order History", fg="#333", bg="#9AFF9A")
         title.config(font=tkFont.Font(size=18, weight="bold"))
         title.pack(pady=20)
 
         # Loop through each order and display details
         for order in history_list:
-            order_frame = tk.Frame(scrollable_frame, bd=2, relief="ridge", padx=50, pady=15)
+            order_frame = tk.Frame(scrollable_frame, bd=2, relief="ridge", padx=50, pady=15, bg="#9AFF9A")
             order_frame.pack(pady=15, fill="both", padx=30, expand=True)
 
             summary = f"Order ID: {order.request_id}\n" \
@@ -53,21 +53,21 @@ class OrderHistoryScreen:
                       f"Address: {order.delivery_address}\n" \
                       f"People: {order.number_of_people}"
 
-            summary_label = tk.Label(order_frame, text=summary, justify="left")
+            summary_label = tk.Label(order_frame, text=summary, justify="left", bg="#9AFF9A")
             summary_label.pack(anchor="w")
 
-            tk.Label(order_frame, text="Items:", font=tkFont.Font(weight="bold")).pack(anchor="w", pady=(5, 0))
+            tk.Label(order_frame, text="Items:", font=tkFont.Font(weight="bold"), bg="#9AFF9A").pack(anchor="w", pady=(5, 0))
 
             for item, qty in order.items.items():
-                item_label = tk.Label(order_frame, text=f"• {item}: {qty}")
+                item_label = tk.Label(order_frame, text=f"• {item}: {qty}", bg="#9AFF9A")
                 item_label.pack(anchor="w", padx=15)
 
             # Inside the for loop, where each order is displayed, add a report button
-            report_button = tk.Button(order_frame, text="Report" , command=lambda o=order: self.click_report(o))
+            report_button = tk.Button(order_frame, text="Report" , command=lambda o=order: self.click_report(o), bg="#cc0000", fg="white")
             report_button.pack(pady=(5,0))
 
         # Back button
-        tk.Button(self.root, text="Back to Main Menu", command=self.back_to_main).pack(pady=10)
+        tk.Button(self.root, text="Back to Main Menu", command=self.back_to_main, bg="#9AFF9A").pack(pady=10)
 
     # Event handler when the report button is clicked
     def click_report(self, order):

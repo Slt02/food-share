@@ -12,7 +12,7 @@ class DropOffRegistrationScreen:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        title = tk.Label(self.root, text="📦 Drop-Off Agent Registration", fg="#003366")
+        title = tk.Label(self.root, text="📦 Drop-Off Agent Registration", fg="#003366", bg="#9AFF9A")
         title.config(font=tkFont.Font(size=18, weight="bold"))
         title.pack(pady=20)
 
@@ -20,7 +20,7 @@ class DropOffRegistrationScreen:
         self.entries = {}
         fields = ["Name", "Surname", "Username", "Email", "Password", "Phone"]
         for field in fields:
-            label = tk.Label(self.root, text=f"{field}:")
+            label = tk.Label(self.root, text=f"{field}:" , bg="#9AFF9A")
             label.pack()
             entry = tk.Entry(self.root, show="*" if field == "Password" else None, width=30)
             entry.pack(pady=5)

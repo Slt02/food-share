@@ -19,7 +19,7 @@ class OrderController:
             # If items are available, create a new order
             if self.db.check_availability(items):
                 # Create a new Food Request
-                food_request = FoodRequest(customer_id, delivery_address, number_of_people, items)
+                food_request = FoodRequest(customer_id, delivery_address, number_of_people, None, items)
                 self.db.save_order(food_request) # Save the order to the database
                 success_screen = ConfirmedOrderScreen(self.root) # Create a new Confirmed Order screen
                 success_screen.show_confirmed_order(food_request) # Show the order confirmation screen

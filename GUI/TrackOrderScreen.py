@@ -14,25 +14,29 @@ class TrackOrderScreen:
             widget.destroy()
 
         # Title
-        title = tk.Label(self.root, text="📦 Track Your Order", fg="#333")
+        title = tk.Label(self.root, text="📦 Track Your Order", fg="#333", bg="#9AFF9A")
         title.config(font=tkFont.Font(size=18, weight="bold"))
         title.pack(pady=20)
 
         # Status
-        status_label = tk.Label(self.root, text=f"Current Status: {food_request.status}")
+        status_label = tk.Label(self.root, text=f"Current Status: {food_request.status}", bg="#9AFF9A")
         status_label.config(font=tkFont.Font(size=14), fg="blue")
         status_label.pack(pady=(0, 10))
 
         # Summary
         summary = f"Address: {food_request.delivery_address}\n" \
                   f"People: {food_request.number_of_people}\n"
-        summary_label = tk.Label(self.root, text=summary)
+        summary_label = tk.Label(self.root, text=summary, bg="#9AFF9A")
+        summary_label.config(font=tkFont.Font(size=12))
         summary_label.pack(pady=(0, 10))
 
         # Items
-        tk.Label(self.root, text="Items Ordered:").pack(anchor="w", padx=30)
+        item_title_font = tkFont.Font(size=14, weight="bold")
+        tk.Label(self.root, text="Items Ordered:", bg="#9AFF9A", font=item_title_font).pack(anchor="w", padx=30)
+
+        item_font = tkFont.Font(size=12)
         for item, qty in food_request.items.items():
-            tk.Label(self.root, text=f"• {item}: {qty}").pack(anchor="w", padx=50)
+            tk.Label(self.root, text=f"• {item}: {qty}", bg="#9AFF9A", font=item_font).pack(anchor="w", padx=50)
         
 
         #Return to main menu button

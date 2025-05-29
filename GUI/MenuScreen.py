@@ -1,29 +1,32 @@
 import tkinter as tk
 from tkinter import messagebox
 from MenuController import MenuController
+from GUI.OrderFormScreen import OrderFormScreen
 
 
 
 class MenuScreen:
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, customer_id=None):
         self.parent = parent
         self.menu_controller = MenuController()
         self.window = None
         self.available_items = []
+        self.cart = {}
+        self.customer_id = customer_id  # Store customer ID if provided
         
     def show(self):
         """Display the menu screen"""
         self.window = tk.Toplevel(self.parent) if self.parent else tk.Tk()
         self.window.title("Food Share - Menu")
         self.window.geometry("800x600")
-        self.window.configure(bg="#f5f7fa")
+        self.window.configure(bg="#9AFF9A")
         
         # Title
         title = tk.Label(
             self.window,
             text="🍽️ Available Menu",
             font=("Arial", 24, "bold"),
-            bg="#f5f7fa",
+            bg="#9AFF9A",
             fg="#1f2937"
         )
         title.pack(pady=30)
@@ -43,6 +46,32 @@ class MenuScreen:
             command=self.refresh_menu
         )
         refresh_btn.pack(pady=20)
+
+        # View Cart button
+        view_cart_btn = tk.Button(
+            self.window,
+            text="🛒 View Cart",
+            font=("Arial", 12, "bold"),
+            bg="#10b981",
+            fg="white",
+            padx=20,
+            pady=10,
+            command=self.click_cart
+        )
+        view_cart_btn.pack(pady=10)
+
+        # Clear cart button
+        clear_cart_btn = tk.Button(
+            self.window,
+            text="🗑️ Clear Cart",
+            font=("Arial", 12, "bold"),
+            bg="#ef4444",
+            fg="white",
+            padx=20,
+            pady=10,
+            command=lambda: self.cart.clear()
+        )
+        clear_cart_btn.pack(pady=10)
         
         self.load_menu()
         
@@ -52,7 +81,7 @@ class MenuScreen:
     def create_menu_area(self):
         """Create scrollable menu area"""
         # Frame for menu items
-        self.menu_frame = tk.Frame(self.window, bg="#f5f7fa")
+        self.menu_frame = tk.Frame(self.window, bg="#9AFF9A")
         self.menu_frame.pack(fill=tk.BOTH, expand=True, padx=40, pady=20)
     
     def load_menu(self):
@@ -169,8 +198,8 @@ class MenuScreen:
         """Display info popup"""
         popup = tk.Toplevel(self.window)
         popup.title("Food Details")
-        popup.geometry("400x350")
-        popup.configure(bg="white")
+        popup.geometry("400x450")
+        popup.configure(bg="#9AFF9A")
         popup.transient(self.window)
         popup.grab_set()
         
@@ -179,19 +208,19 @@ class MenuScreen:
             popup,
             text="🍽️",
             font=("Arial", 30),
-            bg="white"
+            bg="#9AFF9A"
         ).pack(pady=(30, 10))
         
         tk.Label(
             popup,
             text=item_name,
             font=("Arial", 20, "bold"),
-            bg="white",
+            bg="#9AFF9A",
             fg="#1f2937"
         ).pack(pady=(0, 30))
         
         # Details frame
-        details = tk.Frame(popup, bg="#f8f9fa", relief=tk.GROOVE, bd=1)
+        details = tk.Frame(popup, bg="#9AFF9A", relief=tk.GROOVE, bd=1)
         details.pack(fill=tk.BOTH, expand=True, padx=30, pady=(0, 30))
         
         # Get category and description
@@ -203,7 +232,7 @@ class MenuScreen:
             details,
             text="Category",
             font=("Arial", 12, "bold"),
-            bg="#f8f9fa",
+            bg="#9AFF9A",
             fg="#1f2937"
         ).pack(anchor="w", padx=20, pady=(20, 5))
         
@@ -211,7 +240,7 @@ class MenuScreen:
             details,
             text=category,
             font=("Arial", 11),
-            bg="#f8f9fa",
+            bg="#9AFF9A",
             fg="#6b7280"
         ).pack(anchor="w", padx=20, pady=(0, 15))
         
@@ -220,7 +249,7 @@ class MenuScreen:
             details,
             text="Description",
             font=("Arial", 12, "bold"),
-            bg="#f8f9fa",
+            bg="#9AFF9A",
             fg="#1f2937"
         ).pack(anchor="w", padx=20, pady=(0, 5))
         
@@ -228,7 +257,7 @@ class MenuScreen:
             details,
             text=description,
             font=("Arial", 11),
-            bg="#f8f9fa",
+            bg="#9AFF9A",
             fg="#6b7280",
             wraplength=320,
             justify=tk.LEFT
@@ -239,12 +268,12 @@ class MenuScreen:
             details,
             text="✅ Available Now",
             font=("Arial", 11, "bold"),
-            bg="#f8f9fa",
+            bg="#9AFF9A",
             fg="#10b981"
         ).pack(anchor="w", padx=20, pady=(0, 20))
         
         # Buttons
-        btn_frame = tk.Frame(popup, bg="white")
+        btn_frame = tk.Frame(popup, bg="#9AFF9A")
         btn_frame.pack(fill=tk.X, padx=30, pady=(0, 30))
         
         tk.Button(
@@ -271,9 +300,27 @@ class MenuScreen:
     
     def add_to_order(self, item_name, popup):
         """Add to order placeholder"""
-        messagebox.showinfo("Order", f"{item_name} will be added to your order!")
+        print(f"Adding {item_name} to order")
+        if( item_name in self.cart):
+            self.cart[item_name] += 1
+        else:
+            self.cart[item_name] = 1
+
         popup.destroy()
     
+    def click_cart(self):
+        """Handle cart click"""
+        if not self.cart:
+            messagebox.showinfo("Cart", "Your cart is empty.")
+            return
+        
+        # Create OrderFormScreen with selected items
+        order_form = OrderFormScreen(self.window, self.cart, self.customer_id)
+        order_form.showOrderForm()
+
+        # Clear the Cart
+        #self.cart.clear()
+
     def refresh_menu(self):
         """Refresh menu"""
         self.load_menu()

@@ -99,6 +99,8 @@ class Database:
             self.execute_query(query, params)
 
         self.connection.commit()
+        # Clear the cart
+        items.clear()
 
     # Check if the order exists in the database
     def query_order(self, customer_id):

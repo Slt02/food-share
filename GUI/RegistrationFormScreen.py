@@ -16,7 +16,7 @@ class RegistrationFormScreen:
             self.root = tk.Tk()
             
         self.root.title("Food Share - Donation Registration")
-        self.root.geometry("500x400")
+        self.root.geometry("500x550")
         self.root.configure(bg='#f0f0f0')
         
         # Handle window closing properly
