@@ -89,7 +89,17 @@ class MainScreenAdmin:
         inventory_app = ManageInventoryScreen(inventory_window)
         
     def monitor_requests(self):
-        messagebox.showinfo("Monitor Requests", "Monitor Requests button clicked. (Not implemented)")
+        
+
+        from GUI.PendingOrdersScreen import PendingOrdersScreen
+        
+        # Hide the admin main screen
+        self.root.withdraw()
+        
+        # Create a new window for inventory management
+        PendingOrders_window = tk.Toplevel(self.root)
+        PendingOrders_app = PendingOrdersScreen(PendingOrders_window)
+
 
     def monitor_delivery(self):
         messagebox.showinfo("Monitor Delivery", "Monitor Delivery button clicked. (Not implemented)")

@@ -18,7 +18,7 @@ class ManageInventoryScreen:
         text="modify",
         width=20,
         height=2,
-        command=self.ΜanagementControl_Screen,
+        command=self.ManagementControl_Screen,
         ).pack(side="bottom", anchor="se", padx=10, pady=10)
 
         
@@ -265,19 +265,19 @@ class ManageInventoryScreen:
             style.configure("Treeview.Heading", background="#81C784", foreground="white")
             
             # Create treeview
-            columns = ('Name', 'Quantity', 'Status', 'Description')
+            columns = ('Name', 'Quantity',  'Description')
             tree = ttk.Treeview(tree_frame, columns=columns, show='headings', height=10)
             
             # Define headings
             tree.heading('Name', text='Item Name')
             tree.heading('Quantity', text='Quantity')
-            tree.heading('Status', text='Status')
+            
             tree.heading('Description', text='Description')
             
             # Configure columns
             tree.column('Name', width=150)
             tree.column('Quantity', width=80, anchor='center')
-            tree.column('Status', width=80, anchor='center')
+            
             tree.column('Description', width=300)
             
             # Add items
@@ -286,7 +286,7 @@ class ManageInventoryScreen:
                 tree.insert('', tk.END, values=(
                     item['name'],
                     item['quantity'],
-                    status_display,
+                    
                     item['description'][:50] + '...' if len(item['description']) > 50 else item['description']
                 ))
             
@@ -321,11 +321,7 @@ class ManageInventoryScreen:
     def get_status_display(self, status):
         """Get formatted status display"""
         status_map = {
-            'critical': '🔴 Critical',
-            'low': '🟡 Low',
-            'medium': '🟠 Medium',
-            'good': '🟢 Good',
-            'excellent': '💚 Excellent'
+            
         }
         return status_map.get(status, status)
     
@@ -336,8 +332,8 @@ class ManageInventoryScreen:
                 self.controller.close()
             self.root.destroy()
     
-    def ΜanagementControl_Screen(self):
-        from ManagementControlScreen import ManagementControlScreen
+    def ManagementControl_Screen(self):
+        from GUI.ManagementControlScreen import ManagementControlScreen
         
         # Hide the admin main screen
         self.root.withdraw()
