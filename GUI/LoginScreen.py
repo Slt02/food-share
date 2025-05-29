@@ -9,7 +9,7 @@ class LoginScreen:
         self.root = tk.Tk()
         self.root.title("FoodShare - Login")
         self.root.geometry("400x650")  
-        self.root.configure(bg="#2c3e50")
+        self.root.configure(bg="#9AFF9A")  # Light green background
         self.root.resizable(True, True)  
         
         # Add fullscreen capability
@@ -24,36 +24,36 @@ class LoginScreen:
     
     def setup_ui(self):
         # Main container - centered content that works in both windowed and fullscreen
-        main_frame = tk.Frame(self.root, bg="#2c3e50")
+        main_frame = tk.Frame(self.root, bg="#9AFF9A")
         main_frame.pack(fill="both", expand=True, padx=30, pady=20)
         
         # Content container - max width to prevent stretching in fullscreen
-        content_frame = tk.Frame(main_frame, bg="#2c3e50")
+        content_frame = tk.Frame(main_frame, bg="#9AFF9A")
         content_frame.pack(expand=True)  # Center the content)
         
         # Title with fullscreen hint
-        title_frame = tk.Frame(content_frame, bg="#2c3e50")
+        title_frame = tk.Frame(content_frame, bg="#9AFF9A")
         title_frame.pack(pady=(0, 40))
         
         title_label = tk.Label(
             title_frame,
             text="FoodShare",
             font=("Arial", 28, "bold"),
-            bg="#2c3e50",
-            fg="#ecf0f1"
+            bg="#9AFF9A",
+            fg="#2F4F4F"
         )
         title_label.pack()
         
         # Login form
-        login_frame = tk.Frame(content_frame, bg="#34495e", relief="raised", bd=2)
+        login_frame = tk.Frame(content_frame, bg="#32CD32", relief="raised", bd=2)
         login_frame.pack(fill="x", pady=(0, 30))  # Increased bottom padding
         
         login_title = tk.Label(
             login_frame,
             text="Login",
             font=("Arial", 18, "bold"),
-            bg="#34495e",
-            fg="#ecf0f1"
+            bg="#32CD32",
+            fg="white"
         )
         login_title.pack(pady=15)
         
@@ -68,7 +68,7 @@ class LoginScreen:
             login_frame,
             text="Login",
             font=("Arial", 14, "bold"),
-            bg="#3498db",
+            bg="#228B22",
             fg="white",
             relief="flat",
             padx=30,
@@ -78,15 +78,15 @@ class LoginScreen:
         login_button.pack(pady=(15, 20))  # Added bottom padding
         
         # Registration section
-        register_frame = tk.Frame(content_frame, bg="#2c3e50")
+        register_frame = tk.Frame(content_frame, bg="#9AFF9A")
         register_frame.pack(fill="x", expand=False)  # Don't expand, fixed positioning
         
         register_label = tk.Label(
             register_frame,
             text="New User?",
             font=("Arial", 14, "bold"),
-            bg="#2c3e50",
-            fg="#ecf0f1"
+            bg="#9AFF9A",
+            fg="#2F4F4F"
         )
         register_label.pack(pady=(0, 15))
         
@@ -95,7 +95,7 @@ class LoginScreen:
             register_frame,
             text="Register as Customer",
             font=("Arial", 12),
-            bg="#27ae60",
+            bg="#32CD32",
             fg="white",
             relief="flat",
             padx=20,
@@ -108,7 +108,7 @@ class LoginScreen:
             register_frame,
             text="Register as Donor",
             font=("Arial", 12),
-            bg="#e74c3c",
+            bg="#32CD32",
             fg="white",
             relief="flat",
             padx=20,
@@ -119,15 +119,15 @@ class LoginScreen:
     
     def _create_form_field(self, parent, label_text, show=None):
         """Helper method to create form fields"""
-        field_frame = tk.Frame(parent, bg="#34495e")
+        field_frame = tk.Frame(parent, bg="#32CD32")
         field_frame.pack(fill="x", padx=20, pady=8)
         
         label = tk.Label(
             field_frame,
             text=label_text,
             font=("Arial", 11),
-            bg="#34495e",
-            fg="#ecf0f1"
+            bg="#32CD32",
+            fg="white"
         )
         label.pack(anchor="w", pady=(0, 3))
         
@@ -136,8 +136,8 @@ class LoginScreen:
             font=("Arial", 12),
             relief="solid",
             borderwidth=1,
-            bg="#ecf0f1",
-            fg="#2c3e50",
+            bg="white",
+            fg="#2F4F4F",
             show=show
         )
         entry.pack(fill="x", ipady=8)
@@ -224,7 +224,7 @@ class LoginScreen:
         
         if self.is_fullscreen:
             
-            self.root.configure(bg="#2c3e50")
+            self.root.configure(bg="#9AFF9A")
         
         return "break"
     
@@ -237,5 +237,3 @@ class LoginScreen:
     def display(self):
         """Display the login screen"""
         self.root.mainloop()
-
-
