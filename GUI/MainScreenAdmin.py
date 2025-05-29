@@ -128,13 +128,20 @@ class MainScreenAdmin:
         # Hide the admin main screen
         self.root.withdraw()
         
-        # Create a new window for inventory management
+        
         PendingOrders_window = tk.Toplevel(self.root)
         PendingOrders_app = PendingOrdersScreen(PendingOrders_window)
 
 
     def monitor_delivery(self):
-        messagebox.showinfo("Monitor Delivery", "Monitor Delivery button clicked. (Not implemented)")
+       
+
+        from GUI.PendingDeliveriesScreen import PendingDeliveriesScreen
+        
+        # Hide the admin main screen
+        self.root.withdraw()
+        
+        PendingDeliveries_app = PendingDeliveriesScreen(self.root)
 
     def view_statistics(self):
         # Pass the real admin_id instead of hardcoded 123

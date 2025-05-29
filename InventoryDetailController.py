@@ -434,7 +434,6 @@ if __name__ == "__main__":
             print(f"  Min/Max: {stats['min_quantity']}/{stats['max_quantity']}")
             print(f"  Health: {stats['inventory_health']}")
 
-    
     # Get all categories summary
     print("\nAll Categories Summary:")
     summaries = controller.get_all_categories_summary()
