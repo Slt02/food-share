@@ -8,18 +8,34 @@ class MainScreenDropoffAgent:
         self.root = tk.Tk()
         self.root.title("Drop-Off Agent Main Screen")
         self.root.geometry("400x500")
+        self.root.configure(bg="#9AFF9A")  # Light green background
         
         # Store user data and get the real user ID
         self.user_data = user_data
         self.user_id = user_data['id'] if user_data else None
         
+        # FoodShare title at the top
+        tk.Label(
+            self.root, 
+            text="FoodShare", 
+            font=("Helvetica", 20, "bold"), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(20, 10))
+        
         # Display welcome message with user name
         if user_data:
-            welcome_text = f"Drop-Off Agent Main Screen - Welcome {user_data['name']}"
+            welcome_text = f"DROP-OFF AGENT - Welcome {user_data['name']}"
         else:
-            welcome_text = "Drop-Off Agent Main Screen"
+            welcome_text = "DROP-OFF AGENT"
         
-        tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
+        tk.Label(
+            self.root, 
+            text=welcome_text, 
+            font=("Helvetica", 14), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(0, 20))
 
         # "Update Delivery Status" button
         tk.Button(
@@ -27,7 +43,10 @@ class MainScreenDropoffAgent:
             text="Update Delivery Status",
             command=self.update_delivery_status,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
         # "Assign Delivery" button
@@ -36,7 +55,10 @@ class MainScreenDropoffAgent:
             text="Assign Delivery",
             command=self.assign_delivery,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
         # "View Available Requests" button
@@ -45,22 +67,26 @@ class MainScreenDropoffAgent:
             text="View Available Requests",
             command=self.view_available_requests,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
-        # "Manage Account" button at the bottom.
+        # "Manage Account" button moved up with other buttons
         tk.Button(
             self.root,
             text="Manage Account",
             command=self.manage_account,
-            bg="#4CAF50",
+            bg="#32CD32",
             fg="white",
             width=20,
-            height=2
-        ).pack(side="bottom", pady=20)
+            height=2,
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
 
     def update_delivery_status(self):
-        messagebox.showinfo("Update Delivery Status", "Update Delivery Status clicked. (Not implemented)")
+        UpdateDeliveryStatusScreen(self.root, self.user_id)
 
     def assign_delivery(self):
         AvailableRequestsScreen(self.root, self.user_id)
@@ -75,9 +101,6 @@ class MainScreenDropoffAgent:
         account_screen = AccountModScreen(self.root, "dropoffagent")
         
         account_screen.displayAccountModScreen(user_id=self.user_id)
-    
-    def update_delivery_status(self):
-        UpdateDeliveryStatusScreen(self.root, self.user_id)
 
     def display(self):
         """Display the dropoff agent main screen"""

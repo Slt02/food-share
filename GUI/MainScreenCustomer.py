@@ -11,6 +11,7 @@ class CustomerMainScreen:
         self.root = root if root is not None else tk.Tk()  # Use provided root or create a new one
         self.root.title("Customer Main Screen")
         self.root.geometry("500x500")
+        self.root.configure(bg="#9AFF9A")  # Light green background
         
         # Store user data and get the real user ID
         self.customer_id = customer_id
@@ -19,30 +20,73 @@ class CustomerMainScreen:
         # Initialize database connection
         self.init_database()
         
-        # Display welcome message with user name
-        welcome_text = "Welcome - Customer Main Screen"
+        # FoodShare title at the top
+        tk.Label(
+            self.root, 
+            text="FoodShare", 
+            font=("Helvetica", 20, "bold"), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(20, 10))
         
-        tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
+        # Display welcome message with user name
+        welcome_text = "CUSTOMER - Welcome"
+        
+        tk.Label(
+            self.root, 
+            text=welcome_text, 
+            font=("Helvetica", 14), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(0, 20))
 
         # "Menu" button
-        tk.Button(self.root, text="Menu", command=self.menu, width=20, height=2).pack(pady=10)
+        tk.Button(
+            self.root, 
+            text="Menu", 
+            command=self.menu, 
+            width=20, 
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
         
         # "Order History" button
-        tk.Button(self.root, text="Order History", command=self.order_history, width=20, height=2).pack(pady=10)
+        tk.Button(
+            self.root, 
+            text="Order History", 
+            command=self.order_history, 
+            width=20, 
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
         
         # "Track Order" button
-        tk.Button(self.root, text="Track Order", command=self.track_order, width=20, height=2).pack(pady=10)
+        tk.Button(
+            self.root, 
+            text="Track Order", 
+            command=self.track_order, 
+            width=20, 
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
 
-        # "Manage Account" button at the bottom.
+        # "Manage Account" button moved up with other buttons
         tk.Button(
             self.root,
             text="Manage Account",
             command=self.manage_account,
-            bg="#4CAF50",
+            bg="#32CD32",
             fg="white",
             width=20,
-            height=2
-        ).pack(side="bottom", pady=20)
+            height=2,
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
 
     def init_database(self):
         """Initialize database connection using Database class"""

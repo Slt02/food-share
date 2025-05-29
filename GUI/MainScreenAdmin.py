@@ -9,18 +9,34 @@ class MainScreenAdmin:
         self.root = tk.Tk() if root is None else root 
         self.root.title("Admin Main Screen")
         self.root.geometry("400x500")
+        self.root.configure(bg="#9AFF9A")  # Light green background
         
         # Store user data and get the real user ID
         self.user_data = user_data
         self.user_id = user_data['id'] if user_data else None
         
+        # FoodShare title at the top
+        tk.Label(
+            self.root, 
+            text="FoodShare", 
+            font=("Helvetica", 20, "bold"), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(20, 10))
+        
         # Display welcome message with user name
         if user_data:
-            welcome_text = f"Admin Main Screen - Welcome {user_data['name']}"
+            welcome_text = f"ADMIN - Welcome {user_data['name']}"
         else:
-            welcome_text = "Admin Main Screen"
+            welcome_text = "ADMIN"
         
-        tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
+        tk.Label(
+            self.root, 
+            text=welcome_text, 
+            font=("Helvetica", 14), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(0, 20))
 
         # "Manage Inventory" button
         tk.Button(
@@ -28,7 +44,10 @@ class MainScreenAdmin:
             text="Manage Inventory",
             command=self.manage_inventory,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
         # "Monitor Requests" button
@@ -37,7 +56,10 @@ class MainScreenAdmin:
             text="Monitor Requests",
             command=self.monitor_requests,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
         # "Monitor Delivery" button
@@ -46,7 +68,10 @@ class MainScreenAdmin:
             text="Monitor Delivery",
             command=self.monitor_delivery,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
         # "View Statistics & Reports" button
@@ -55,19 +80,11 @@ class MainScreenAdmin:
             text="View Statistics & Reports",
             command=self.view_statistics,
             width=20,
-            height=2
-        ).pack(pady=10)
-
-        # "Manage Account" button at the bottom.
-        tk.Button(
-            self.root,
-            text="Manage Account",
-            command=self.manage_account,
-            bg="#4CAF50",
+            height=2,
+            bg="#32CD32",
             fg="white",
-            width=20,
-            height=2
-        ).pack(side="bottom", pady=20)
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
 
         # "Create Drop-Off Account" button
         tk.Button(
@@ -75,7 +92,22 @@ class MainScreenAdmin:
             text="Create Drop-Off Account",
             command=self.create_drop_off_agent_account,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
+
+        # "Manage Account" button moved up with other buttons
+        tk.Button(
+            self.root,
+            text="Manage Account",
+            command=self.manage_account,
+            bg="#32CD32",
+            fg="white",
+            width=20,
+            height=2,
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
     def manage_inventory(self):
@@ -134,5 +166,3 @@ class MainScreenAdmin:
         # Open the DropOffRegistrationScreen
         drop_off_screen = DropOffRegistrationScreen(self.root)
         drop_off_screen.show_registration_form()
-
-    

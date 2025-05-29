@@ -6,6 +6,7 @@ class MainScreenDonor:
         self.root = tk.Tk()
         self.root.title("Donor Main Screen")
         self.root.geometry("400x500")
+        self.root.configure(bg="#9AFF9A")  # Light green background
         
         # Store user data and get the real user ID
         self.user_data = user_data
@@ -14,13 +15,28 @@ class MainScreenDonor:
         # Initialize DonationController - will be set up when needed
         self.DonationController = None
         
+        # FoodShare title at the top
+        tk.Label(
+            self.root, 
+            text="FoodShare", 
+            font=("Helvetica", 20, "bold"), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(20, 10))
+        
         # Display welcome message with user name
         if user_data:
-            welcome_text = f"Donor Main Screen - Welcome {user_data['name']}"
+            welcome_text = f"DONOR - Welcome {user_data['name']}"
         else:
-            welcome_text = "Donor Main Screen"
+            welcome_text = "DONOR"
         
-        tk.Label(self.root, text=welcome_text, font=("Helvetica", 16)).pack(pady=20)
+        tk.Label(
+            self.root, 
+            text=welcome_text, 
+            font=("Helvetica", 14), 
+            bg="#9AFF9A", 
+            fg="#2F4F4F"
+        ).pack(pady=(0, 20))
 
         # "Report" button
         tk.Button(
@@ -28,7 +44,10 @@ class MainScreenDonor:
             text="Report",
             command=self.report,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
         # "Register Donation" button
@@ -37,7 +56,10 @@ class MainScreenDonor:
             text="Register Donation",
             command=self.register_donation,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
         # "Track Donation" button - Updated text from "Track Donation Usage"
@@ -46,19 +68,23 @@ class MainScreenDonor:
             text="Track Donation",
             command=self.track_donation,
             width=20,
-            height=2
+            height=2,
+            bg="#32CD32",
+            fg="white",
+            font=("Helvetica", 10, "bold")
         ).pack(pady=10)
 
-        # "Manage Account" button at the bottom.
+        # "Manage Account" button moved up with other buttons
         tk.Button(
             self.root,
             text="Manage Account",
             command=self.manage_account,
-            bg="#4CAF50",
+            bg="#32CD32",
             fg="white",
             width=20,
-            height=2
-        ).pack(side="bottom", pady=20)
+            height=2,
+            font=("Helvetica", 10, "bold")
+        ).pack(pady=10)
 
     def _initialize_donation_controller(self):
         """Initialize DonationController when needed"""
