@@ -87,8 +87,3 @@ class StatisticsReportController:
             print("[StatisticsReportController] save_report failed:", err)
             return False
 
-
-if __name__ == "__main__":
-    ctr = StatisticsReportController()
-    rpt = ctr.build_report(admin_id=1)
-    print(rpt.content if rpt else "No data available.")
