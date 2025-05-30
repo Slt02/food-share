@@ -4,4 +4,4 @@ class Donation:
         self.donation_date = donation_date
         self.donation_info = donation_info
         
-        self.donation_history = []
+        self.donations = []
